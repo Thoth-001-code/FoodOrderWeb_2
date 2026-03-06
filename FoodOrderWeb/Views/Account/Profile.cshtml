@@ -1,0 +1,276 @@
+﻿@model ProfileViewModel
+
+@{
+    ViewData["Title"] = "Thông tin cá nhân";
+}
+
+<div class="container py-4">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body text-center p-4">
+                    <div class="position-relative d-inline-block">
+                        <img src="https://randomuser.me/api/portraits/men/1.jpg"
+                             class="rounded-circle mb-3" width="120" height="120" alt="avatar">
+                        <button class="btn btn-sm btn-primary rounded-circle position-absolute bottom-0 end-0"
+                                onclick="document.getElementById('avatarInput').click()">
+                            <i class="fas fa-camera"></i>
+                        </button>
+                        <input type="file" id="avatarInput" style="display: none;" accept="image/*">
+                    </div>
+                    <h5 class="fw-bold mb-1">@Model.FullName</h5>
+                    <p class="text-muted small mb-3">@Model.Email</p>
+                    <div class="d-flex justify-content-center gap-2">
+                        <span class="badge bg-success">@ViewBag.TotalOrders đơn</span>
+                        <span class="badge bg-primary">@ViewBag.MemberSince</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="list-group list-group-flush">
+                    <a asp-action="Profile" class="list-group-item list-group-item-action active">
+                        <i class="fas fa-user me-2"></i>Thông tin cá nhân
+                    </a>
+                    <a asp-controller="Order" asp-action="MyOrders" class="list-group-item list-group-item-action">
+                        <i class="fas fa-clipboard-list me-2"></i>Đơn hàng của tôi
+                    </a>
+                    <a asp-controller="Wallet" asp-action="Index" class="list-group-item list-group-item-action">
+                        <i class="fas fa-wallet me-2"></i>Ví điện tử
+                    </a>
+                    <a asp-action="ChangePassword" class="list-group-item list-group-item-action">
+                        <i class="fas fa-key me-2"></i>Đổi mật khẩu
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action text-danger" onclick="logout()">
+                        <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-user-edit me-2 text-primary"></i>
+                        Thông tin cá nhân
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>
+                            @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <form asp-action="Profile" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label asp-for="FullName" class="form-label fw-bold"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light">
+                                        <i class="fas fa-user"></i>
+                                    </span>
+                                    <input asp-for="FullName" class="form-control" />
+                                </div>
+                                <span asp-validation-for="FullName" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Email" class="form-label fw-bold"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light">
+                                        <i class="fas fa-envelope"></i>
+                                    </span>
+                                    <input asp-for="Email" class="form-control" readonly disabled />
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="PhoneNumber" class="form-label fw-bold"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light">
+                                        <i class="fas fa-phone"></i>
+                                    </span>
+                                    <input asp-for="PhoneNumber" class="form-control" />
+                                </div>
+                                <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Address" class="form-label fw-bold"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                    </span>
+                                    <input asp-for="Address" class="form-control" />
+                                </div>
+                                <span asp-validation-for="Address" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-flex gap-3">
+                            <button type="submit" class="btn btn-primary px-5">
+                                <i class="fas fa-save me-2"></i>Cập nhật
+                            </button>
+                            <button type="reset" class="btn btn-outline-secondary px-5">
+                                <i class="fas fa-undo me-2"></i>Reset
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Recent Orders -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-history me-2 text-primary"></i>
+                        Đơn hàng gần đây
+                    </h5>
+                    <a asp-controller="Order" asp-action="MyOrders" class="btn btn-sm btn-outline-primary">
+                        Xem tất cả <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>Mã ĐH</th>
+                                    <th>Ngày đặt</th>
+                                    <th>Tổng tiền</th>
+                                    <th>Trạng thái</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (ViewBag.RecentOrders != null && ViewBag.RecentOrders.Count > 0)
+                                {
+                                    @foreach (var order in ViewBag.RecentOrders)
+                                    {
+                                        @* Kiểm tra order không null *@
+                                        if (order != null)
+                                        {
+                                            <tr>
+                                                <td>#@order.Id</td>
+                                                <td>@order.OrderDate.ToString("dd/MM/yyyy")</td>
+                                                <td class="fw-bold text-primary">@order.TotalAmount.ToString("#,0")đ</td>
+                                                <td>
+                                                    @switch (order.Status)
+                                                    {
+                                                        case OrderStatus.Pending:
+                                                            <span class="badge bg-warning">Chờ xác nhận</span>
+                                                            break;
+                                                        case OrderStatus.Confirmed:
+                                                            <span class="badge bg-info">Đã xác nhận</span>
+                                                            break;
+                                                        case OrderStatus.Preparing:
+                                                            <span class="badge bg-primary">Đang chuẩn bị</span>
+                                                            break;
+                                                        case OrderStatus.Delivering:
+                                                            <span class="badge bg-secondary">Đang giao</span>
+                                                            break;
+                                                        case OrderStatus.Delivered:
+                                                            <span class="badge bg-success">Đã giao</span>
+                                                            break;
+                                                        case OrderStatus.Cancelled:
+                                                            <span class="badge bg-danger">Đã hủy</span>
+                                                            break;
+                                                        default:
+                                                            <span class="badge bg-dark">Khác</span>
+                                                            break;
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <a asp-controller="Order" asp-action="Details" asp-route-id="@order.Id"
+                                                       class="btn btn-sm btn-outline-primary">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="5" class="text-center py-4">
+                                            <i class="fas fa-box-open text-muted fa-2x mb-2"></i>
+                                            <p class="text-muted mb-0">Chưa có đơn hàng nào</p>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="row g-3 mt-2">
+                <div class="col-md-4">
+                    <div class="card bg-primary text-white border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="text-white-50">Tổng đơn</h6>
+                                    <h3 class="mb-0">@ViewBag.TotalOrders</h3>
+                                </div>
+                                <i class="fas fa-shopping-cart fa-3x opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-success text-white border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="text-white-50">Đã giao</h6>
+                                    <h3 class="mb-0">@ViewBag.DeliveredCount</h3>
+                                </div>
+                                <i class="fas fa-check-circle fa-3x opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-info text-white border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="text-white-50">Tổng chi</h6>
+                                    <h3 class="mb-0">@ViewBag.TotalSpent.ToString("#,0")đ</h3>
+                                </div>
+                                <i class="fas fa-dollar-sign fa-3x opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function logout() {
+            if (confirm('Bạn có chắc muốn đăng xuất?')) {
+                $('#logoutForm').submit();
+            }
+        }
+    </script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -1,10 +1,9 @@
-﻿using FoodOrderWeb.Data;
-using FoodOrderWeb.Models;
-using FoodOrderWeb.ViewModels;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using FoodOrderWeb.Data;
+using FoodOrderWeb.Models;
+using FoodOrderWeb.ViewModels;
 using System.Security.Claims;
 
 namespace FoodOrderWeb.Controllers
@@ -22,6 +21,7 @@ namespace FoodOrderWeb.Controllers
         }
 
         // GET: /Cart
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
             try
@@ -36,13 +36,17 @@ namespace FoodOrderWeb.Controllers
 
                 if (cart == null)
                 {
-                    cart = new Cart { UserId = userId, CreatedAt = DateTime.Now };
+                    cart = new Cart
+                    {
+                        UserId = userId,
+                        CreatedAt = DateTime.Now
+                    };
                     _context.Carts.Add(cart);
                     await _context.SaveChangesAsync();
                 }
 
                 var cartItems = cart.CartItems?.ToList() ?? new List<CartItem>();
-                var subtotal = cartItems.Sum(ci => ci.Quantity * ci.FoodItem.Price);
+                var subtotal = cartItems.Sum(ci => ci.Quantity * (ci.FoodItem?.Price ?? 0));
                 var discount = 0m; // Có thể thêm logic giảm giá sau
                 var total = subtotal - discount;
 
@@ -68,15 +72,37 @@ namespace FoodOrderWeb.Controllers
         {
             try
             {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                // Kiểm tra đăng nhập
+                if (!User.Identity.IsAuthenticated)
+                {
+                    return Json(new { success = false, message = "Vui lòng đăng nhập để thêm vào giỏ hàng" });
+                }
 
-                // Kiểm tra món ăn có tồn tại không
+                // Kiểm tra role
+                if (User.IsInRole("Admin"))
+                {
+                    return Json(new { success = false, message = "Admin không thể thêm vào giỏ hàng" });
+                }
+
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Json(new { success = false, message = "Không thể xác định người dùng" });
+                }
+
+                // Kiểm tra món ăn
                 var foodItem = await _context.FoodItems
                     .FirstOrDefaultAsync(f => f.Id == foodItemId && f.IsAvailable);
 
                 if (foodItem == null)
                 {
                     return Json(new { success = false, message = "Món ăn không tồn tại hoặc đã hết hàng" });
+                }
+
+                // Kiểm tra số lượng
+                if (quantity < 1 || quantity > 10)
+                {
+                    return Json(new { success = false, message = "Số lượng phải từ 1 đến 10" });
                 }
 
                 // Lấy giỏ hàng của user
@@ -86,14 +112,13 @@ namespace FoodOrderWeb.Controllers
 
                 if (cart == null)
                 {
-                    cart = new Cart { UserId = userId, CreatedAt = DateTime.Now };
+                    cart = new Cart
+                    {
+                        UserId = userId,
+                        CreatedAt = DateTime.Now
+                    };
                     _context.Carts.Add(cart);
                     await _context.SaveChangesAsync();
-
-                    // Load lại cart để có CartItems
-                    cart = await _context.Carts
-                        .Include(c => c.CartItems)
-                        .FirstOrDefaultAsync(c => c.UserId == userId);
                 }
 
                 // Kiểm tra món đã có trong giỏ chưa
@@ -154,10 +179,16 @@ namespace FoodOrderWeb.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateQuantity(int cartItemId, int quantity)
         {
+            // Khai báo biến ở ngoài để dùng trong catch
+            CartItem cartItem = null;
+
             try
             {
-                var cartItem = await _context.CartItems
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                cartItem = await _context.CartItems
                     .Include(ci => ci.FoodItem)
+                    .Include(ci => ci.Cart)
                     .FirstOrDefaultAsync(ci => ci.Id == cartItemId);
 
                 if (cartItem == null)
@@ -166,32 +197,23 @@ namespace FoodOrderWeb.Controllers
                 }
 
                 // Kiểm tra quyền sở hữu
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                var cart = await _context.Carts
-                    .FirstOrDefaultAsync(c => c.Id == cartItem.CartId);
-
-                if (cart.UserId != userId)
+                if (cartItem.Cart.UserId != userId)
                 {
                     return Json(new { success = false, message = "Bạn không có quyền thao tác với giỏ hàng này" });
                 }
 
-                if (quantity <= 0)
+                // Kiểm tra số lượng hợp lệ
+                if (quantity < 1 || quantity > 10)
                 {
-                    _context.CartItems.Remove(cartItem);
-                }
-                else if (quantity > 10)
-                {
-                    return Json(new { success = false, message = "Số lượng không được vượt quá 10" });
-                }
-                else
-                {
-                    cartItem.Quantity = quantity;
+                    return Json(new { success = false, message = "Số lượng phải từ 1 đến 10" });
                 }
 
+                // Cập nhật số lượng
+                cartItem.Quantity = quantity;
                 await _context.SaveChangesAsync();
 
-                // Tính lại tổng tiền
-                cart = await _context.Carts
+                // Tính lại tổng tiền giỏ hàng
+                var cart = await _context.Carts
                     .Include(c => c.CartItems)
                         .ThenInclude(ci => ci.FoodItem)
                     .FirstOrDefaultAsync(c => c.UserId == userId);
@@ -208,6 +230,28 @@ namespace FoodOrderWeb.Controllers
                     cartCount = cartCount
                 });
             }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                _logger.LogError(ex, "Concurrency error when updating quantity for cartItem {CartItemId}", cartItemId);
+
+                // Xử lý concurrent update - reload dữ liệu
+                if (cartItem != null)
+                {
+                    try
+                    {
+                        // Cast the context to DbContext so we call the base Entry method that returns EntityEntry,
+                        // then call ReloadAsync on that EntityEntry. This avoids calling an ApplicationDbContext.Entry
+                        // overload that returns object and causes the CS1061 error.
+                        await ((DbContext)_context).Entry(cartItem).ReloadAsync();
+                    }
+                    catch (Exception reloadEx)
+                    {
+                        _logger.LogError(reloadEx, "Error reloading cartItem after concurrency conflict");
+                    }
+                }
+
+                return Json(new { success = false, message = "Dữ liệu đã thay đổi, vui lòng thử lại" });
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Lỗi khi cập nhật số lượng");
@@ -222,6 +266,8 @@ namespace FoodOrderWeb.Controllers
         {
             try
             {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
                 var cartItem = await _context.CartItems
                     .Include(ci => ci.Cart)
                     .FirstOrDefaultAsync(ci => ci.Id == cartItemId);
@@ -232,7 +278,6 @@ namespace FoodOrderWeb.Controllers
                 }
 
                 // Kiểm tra quyền sở hữu
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 if (cartItem.Cart.UserId != userId)
                 {
                     return Json(new { success = false, message = "Bạn không có quyền thao tác với giỏ hàng này" });
@@ -310,33 +355,30 @@ namespace FoodOrderWeb.Controllers
                 }
 
                 // Lấy thông tin user
-                var user = await _userManager.GetUserAsync(User);
+                var user = await _context.Users.FindAsync(userId);
 
                 // Lấy thông tin ví
                 var wallet = await _context.Wallets
                     .FirstOrDefaultAsync(w => w.UserId == userId);
 
+                var subtotal = cart.CartItems.Sum(ci => ci.Quantity * ci.FoodItem.Price);
+                var shippingFee = 0m; // Miễn phí ship
+                var discount = 0m;
+                var total = subtotal + shippingFee - discount;
+
                 var model = new CheckoutViewModel
                 {
                     CartItems = cart.CartItems.ToList(),
-                    Subtotal = cart.CartItems.Sum(ci => ci.Quantity * ci.FoodItem.Price),
-                    ShippingFee = 0, // Miễn phí ship
-                    Discount = 0,
-                    Total = cart.CartItems.Sum(ci => ci.Quantity * ci.FoodItem.Price),
+                    Subtotal = subtotal,
+                    ShippingFee = shippingFee,
+                    Discount = discount,
+                    Total = total,
                     WalletBalance = wallet?.Balance ?? 0,
-                    ReceiverName = user.FullName,
-                    PhoneNumber = user.PhoneNumber,
-                    ShippingAddress = user.Address,
+                    ReceiverName = user?.FullName ?? string.Empty,
+                    PhoneNumber = user?.PhoneNumber ?? string.Empty,
+                    ShippingAddress = user?.Address ?? string.Empty,
                     PaymentMethod = PaymentMethod.Cash
                 };
-
-                // Kiểm tra xem có mã giảm giá không
-                // if (TempData["CouponCode"] != null)
-                // {
-                //     model.CouponCode = TempData["CouponCode"].ToString();
-                //     model.Discount = CalculateDiscount(model.CouponCode, model.Subtotal);
-                //     model.Total = model.Subtotal + model.ShippingFee - model.Discount;
-                // }
 
                 return View(model);
             }
@@ -364,8 +406,7 @@ namespace FoodOrderWeb.Controllers
 
                 model.CartItems = cart.CartItems.ToList();
                 model.Subtotal = cart.CartItems.Sum(ci => ci.Quantity * ci.FoodItem.Price);
-                model.ShippingFee = 0;
-                model.Total = model.Subtotal - model.Discount;
+                model.Total = model.Subtotal + model.ShippingFee - model.Discount;
 
                 var wallet = await _context.Wallets.FirstOrDefaultAsync(w => w.UserId == userId);
                 model.WalletBalance = wallet?.Balance ?? 0;
@@ -398,14 +439,14 @@ namespace FoodOrderWeb.Controllers
                     ModelState.AddModelError("", "Số dư trong ví không đủ để thanh toán");
 
                     // Load lại dữ liệu
-                    var user = await _userManager.GetUserAsync(User);
+                    var user = await _context.Users.FindAsync(userId2);
                     model.CartItems = cart2.CartItems.ToList();
                     model.Subtotal = subtotal;
                     model.Total = total;
                     model.WalletBalance = wallet?.Balance ?? 0;
-                    model.ReceiverName = user.FullName;
-                    model.PhoneNumber = user.PhoneNumber;
-                    model.ShippingAddress = user.Address;
+                    model.ReceiverName = user?.FullName ?? string.Empty;
+                    model.PhoneNumber = user?.PhoneNumber ?? string.Empty;
+                    model.ShippingAddress = user?.Address ?? string.Empty;
 
                     return View("Checkout", model);
                 }
@@ -495,16 +536,16 @@ namespace FoodOrderWeb.Controllers
                 ModelState.AddModelError("", "Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại.");
 
                 // Load lại dữ liệu
-                var user = await _userManager.GetUserAsync(User);
+                var user = await _context.Users.FindAsync(userId2);
                 var wallet = await _context.Wallets.FirstOrDefaultAsync(w => w.UserId == userId2);
 
                 model.CartItems = cart2.CartItems.ToList();
                 model.Subtotal = subtotal;
                 model.Total = total;
                 model.WalletBalance = wallet?.Balance ?? 0;
-                model.ReceiverName = user.FullName;
-                model.PhoneNumber = user.PhoneNumber;
-                model.ShippingAddress = user.Address;
+                model.ReceiverName = user?.FullName ?? string.Empty;
+                model.PhoneNumber = user?.PhoneNumber ?? string.Empty;
+                model.ShippingAddress = user?.Address ?? string.Empty;
 
                 return View("Checkout", model);
             }
@@ -543,21 +584,36 @@ namespace FoodOrderWeb.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ApplyCoupon(string couponCode)
         {
-            // Kiểm tra mã giảm giá
-            // var coupon = await _context.Coupons.FirstOrDefaultAsync(c => c.Code == couponCode && c.IsActive && c.ExpiryDate >= DateTime.Now);
-            // if (coupon != null)
-            // {
-            //     TempData["CouponCode"] = couponCode;
-            //     TempData["CouponMessage"] = "Áp dụng mã giảm giá thành công!";
-            // }
-            // else
-            // {
-            //     TempData["CouponError"] = "Mã giảm giá không hợp lệ hoặc đã hết hạn";
-            // }
+            try
+            {
+                // TODO: Implement coupon logic
+                // Ví dụ:
+                // var coupon = await _context.Coupons
+                //     .FirstOrDefaultAsync(c => c.Code == couponCode 
+                //         && c.IsActive 
+                //         && c.ExpiryDate >= DateTime.Now);
+                // 
+                // if (coupon != null)
+                // {
+                //     TempData["CouponCode"] = couponCode;
+                //     TempData["DiscountAmount"] = coupon.DiscountAmount;
+                //     TempData["CouponMessage"] = "Áp dụng mã giảm giá thành công!";
+                // }
+                // else
+                // {
+                //     TempData["CouponError"] = "Mã giảm giá không hợp lệ hoặc đã hết hạn";
+                // }
 
-            return RedirectToAction("Checkout");
+                // Tạm thời chưa có chức năng coupon
+                TempData["CouponError"] = "Chức năng đang được phát triển";
+
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi áp dụng mã giảm giá");
+                return Json(new { success = false });
+            }
         }
-
-        private UserManager<ApplicationUser> _userManager;
     }
 }

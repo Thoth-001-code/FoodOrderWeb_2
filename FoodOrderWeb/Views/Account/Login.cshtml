@@ -1,74 +1,125 @@
-﻿@using FoodOrderWeb.ViewModels
-@model LoginViewModel
+﻿@model LoginViewModel
 
 @{
     ViewData["Title"] = "Đăng nhập";
 }
 
-<div class="container mt-5">
+<div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
+        <div class="col-md-6 col-lg-5">
+            <div class="card border-0 shadow-lg">
+                <div class="card-header bg-primary text-white text-center py-4">
                     <h4 class="mb-0">
-                        <i class="fas fa-sign-in-alt me-2"></i>@ViewData["Title"]
+                        <i class="fas fa-sign-in-alt me-2"></i>Đăng nhập
                     </h4>
                 </div>
 
-                <div class="card-body">
+                <div class="card-body p-4">
                     @if (TempData["SuccessMessage"] != null)
                     {
-                        <div class="alert alert-success">
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>
                             @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
                     }
 
                     <form asp-action="Login" method="post">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-                        <div class="mb-3">
-                            <label asp-for="Email" class="form-label"></label>
-                            <input asp-for="Email" class="form-control"
-                                   placeholder="Nhập email của bạn" />
+                        <div class="form-floating mb-3">
+                            <input asp-for="Email" class="form-control" placeholder="name@example.com">
+                            <label asp-for="Email">
+                                <i class="fas fa-envelope me-2"></i>Email
+                            </label>
                             <span asp-validation-for="Email" class="text-danger"></span>
                         </div>
 
-                        <div class="mb-3">
-                            <label asp-for="Password" class="form-label"></label>
-                            <input asp-for="Password" class="form-control"
-                                   placeholder="Nhập mật khẩu" />
+                        <div class="form-floating mb-3">
+                            <input asp-for="Password" class="form-control" placeholder="Password">
+                            <label asp-for="Password">
+                                <i class="fas fa-lock me-2"></i>Mật khẩu
+                            </label>
                             <span asp-validation-for="Password" class="text-danger"></span>
                         </div>
 
-                        <div class="mb-3 form-check">
-                            <input asp-for="RememberMe" class="form-check-input" />
-                            <label asp-for="RememberMe" class="form-check-label">
-                                Ghi nhớ đăng nhập
-                            </label>
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div class="form-check">
+                                <input asp-for="RememberMe" class="form-check-input" />
+                                <label asp-for="RememberMe" class="form-check-label">
+                                    Ghi nhớ đăng nhập
+                                </label>
+                            </div>
+                            <a asp-action="ForgotPassword" class="text-decoration-none small">
+                                Quên mật khẩu?
+                            </a>
                         </div>
 
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="fas fa-sign-in-alt me-2"></i>Đăng nhập
-                            </button>
-                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
+                            <i class="fas fa-sign-in-alt me-2"></i>Đăng nhập
+                        </button>
                     </form>
+
+                    <div class="text-center position-relative my-4">
+                        <hr>
+                        <span class="bg-white px-3 text-muted small position-relative" style="top: -12px;">
+                            Hoặc đăng nhập với
+                        </span>
+                    </div>
+
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <form asp-action="ExternalLogin" method="post">
+                                <input type="hidden" name="provider" value="Google" />
+                                <button type="submit" class="btn btn-outline-danger w-100">
+                                    <i class="fab fa-google me-2"></i>Google
+                                </button>
+                            </form>
+                        </div>
+                        <div class="col-6">
+                            <form asp-action="ExternalLogin" method="post">
+                                <input type="hidden" name="provider" value="Facebook" />
+                                <button type="submit" class="btn btn-outline-primary w-100">
+                                    <i class="fab fa-facebook-f me-2"></i>Facebook
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="card-footer text-center">
+                <div class="card-footer bg-light text-center py-3">
                     <p class="mb-0">
                         Chưa có tài khoản?
-                        <a asp-action="Register" class="text-decoration-none">Đăng ký ngay</a>
+                        <a asp-action="Register" class="text-primary text-decoration-none fw-bold">
+                            Đăng ký ngay
+                        </a>
                     </p>
                 </div>
             </div>
 
-            <!-- Thông tin tài khoản mẫu -->
-            <div class="card mt-3 bg-light">
+            <!-- Demo Accounts -->
+            <div class="card mt-4 border-0 shadow-sm">
                 <div class="card-body">
-                    <h6 class="card-title">Tài khoản mẫu:</h6>
-                    <p class="mb-1"><strong>Admin:</strong> admin@foodorder.com / Admin@123</p>
-                    <p class="mb-0"><strong>User:</strong> user@example.com / User@123</p>
+                    <h6 class="fw-bold mb-3">
+                        <i class="fas fa-info-circle text-primary me-2"></i>
+                        Tài khoản mẫu
+                    </h6>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <div class="p-2 bg-light rounded">
+                                <small class="fw-bold text-primary">User:</small>
+                                <small class="d-block">user@example.com</small>
+                                <small class="d-block">User@123</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-2 bg-light rounded">
+                                <small class="fw-bold text-success">Admin:</small>
+                                <small class="d-block">admin@foodorder.com</small>
+                                <small class="d-block">Admin@123</small>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -80,3 +131,11 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 }
+
+<style>
+    .form-floating > .form-control:focus ~ label,
+    .form-floating > .form-control:not(:placeholder-shown) ~ label {
+        opacity: 1;
+        transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+    }
+</style>

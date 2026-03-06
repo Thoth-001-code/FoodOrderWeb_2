@@ -11,10 +11,10 @@
     <!-- Font Awesome 6 Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-    <!-- Google Fonts - Poppins font đẹp -->
+    <!-- Google Fonts - Poppins -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
-    <!-- Animate.css cho hiệu ứng -->
+    <!-- Animate.css -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 
     <!-- Custom CSS -->
@@ -27,6 +27,10 @@
             --accent-color: #ffe66d;
             --dark-color: #2c3e50;
             --light-color: #f7f9fc;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --info-color: #17a2b8;
         }
 
         body {
@@ -41,62 +45,44 @@
             flex: 1;
         }
 
-        /* Navbar styling */
+        /* Navbar Styles */
         .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             box-shadow: 0 2px 20px rgba(0,0,0,0.1);
             padding: 1rem 0;
         }
 
         .navbar-brand {
             font-weight: 700;
-            font-size: 1.5rem;
-            background: linear-gradient(45deg, #fff, #ffe6e6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-size: 1.8rem;
+            color: white !important;
+            transition: all 0.3s;
         }
+
+            .navbar-brand:hover {
+                transform: scale(1.05);
+            }
 
         .nav-link {
+            color: rgba(255,255,255,0.9) !important;
             font-weight: 500;
-            position: relative;
             padding: 0.5rem 1rem !important;
-            transition: all 0.3s ease;
+            margin: 0 0.2rem;
+            border-radius: 5px;
+            transition: all 0.3s;
         }
 
-        .nav-link::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 2px;
-            background: linear-gradient(90deg, #fff, #ffe6e6);
-            transition: width 0.3s ease;
-        }
-
-        .nav-link:hover::after {
-            width: 80%;
-        }
-
-        /* Cart badge animation */
-        .cart-badge {
-            animation: pulse 1.5s infinite;
-        }
-
-        @@keyframes pulse {
-            0% {
-                transform: scale(1);
+            .nav-link:hover {
+                background: rgba(255,255,255,0.1);
+                color: white !important;
             }
-            50% {
-                transform: scale(1.1);
-            }
-            100% {
-                transform: scale(1);
-            }
-        }
 
-        /* Dropdown menu styling */
+            .nav-link.active {
+                background: rgba(255,255,255,0.2);
+                color: white !important;
+            }
+
+        /* Dropdown Menu */
         .dropdown-menu {
             border: none;
             box-shadow: 0 10px 30px rgba(0,0,0,0.15);
@@ -110,6 +96,7 @@
                 opacity: 0;
                 transform: translateY(-10px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -119,38 +106,83 @@
         .dropdown-item {
             padding: 0.7rem 1.5rem;
             font-weight: 500;
-            transition: all 0.2s ease;
+            transition: all 0.2s;
         }
 
-        .dropdown-item:hover {
-            background: linear-gradient(90deg, #f8f9fa, #e9ecef);
-            padding-left: 2rem;
+            .dropdown-item:hover {
+                background: linear-gradient(90deg, #f8f9fa, #e9ecef);
+                padding-left: 2rem;
+            }
+
+            .dropdown-item i {
+                width: 1.8rem;
+                color: var(--primary-color);
+            }
+
+            .dropdown-item.text-danger i {
+                color: var(--danger-color);
+            }
+
+        /* Cart Badge */
+        .cart-badge {
+            animation: pulse 1.5s infinite;
         }
 
-        .dropdown-item i {
-            width: 1.5rem;
-            color: var(--primary-color);
+        @@keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
         }
 
-        /* Footer styling */
+        /* Footer */
         .footer {
             background: linear-gradient(135deg, #2c3e50, #3498db);
             color: white;
             margin-top: auto;
         }
 
-        .footer a {
-            color: rgba(255,255,255,0.8);
-            text-decoration: none;
-            transition: color 0.3s ease;
+            .footer a {
+                color: rgba(255,255,255,0.8);
+                text-decoration: none;
+                transition: color 0.3s;
+            }
+
+                .footer a:hover {
+                    color: white;
+                    text-decoration: underline;
+                }
+
+            .footer h5 {
+                font-weight: 600;
+                margin-bottom: 1.2rem;
+            }
+
+        .social-links a {
+            display: inline-block;
+            width: 36px;
+            height: 36px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            text-align: center;
+            line-height: 36px;
+            transition: all 0.3s;
         }
 
-        .footer a:hover {
-            color: white;
-            text-decoration: underline;
-        }
+            .social-links a:hover {
+                background: white;
+                color: var(--primary-color) !important;
+                transform: translateY(-3px);
+            }
 
-        /* Alert animation */
+        /* Alerts */
         .alert {
             animation: slideInDown 0.5s ease;
         }
@@ -160,20 +192,21 @@
                 transform: translateY(-100%);
                 opacity: 0;
             }
+
             to {
                 transform: translateY(0);
                 opacity: 1;
             }
         }
 
-        /* Loading overlay */
+        /* Loading Overlay */
         .loading-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(255,255,255,0.8);
+            background: rgba(255,255,255,0.9);
             display: none;
             justify-content: center;
             align-items: center;
@@ -191,11 +224,16 @@
         }
 
         @@keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
-        /* Toast notification */
+        /* Toast Notifications */
         .toast-container {
             position: fixed;
             top: 80px;
@@ -223,29 +261,66 @@
         }
 
         .toast-success {
-            border-left: 4px solid #28a745;
+            border-left: 4px solid var(--success-color);
         }
 
         .toast-error {
-            border-left: 4px solid #dc3545;
+            border-left: 4px solid var(--danger-color);
         }
 
         .toast-warning {
-            border-left: 4px solid #ffc107;
+            border-left: 4px solid var(--warning-color);
         }
 
         .toast-info {
-            border-left: 4px solid #17a2b8;
+            border-left: 4px solid var(--info-color);
         }
+
+        /* Back to Top Button */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 99;
+            transition: all 0.3s;
+        }
+
+            .back-to-top:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            }
 
         /* Responsive */
         @@media (max-width: 768px) {
             .navbar-brand {
-                font-size: 1.2rem;
+                font-size: 1.5rem;
             }
 
             .dropdown-menu {
                 animation: none;
+            }
+
+            .toast-container {
+                top: 60px;
+                right: 10px;
+                left: 10px;
+            }
+
+            .back-to-top {
+                bottom: 20px;
+                right: 20px;
+                width: 40px;
+                height: 40px;
             }
         }
     </style>
@@ -259,27 +334,29 @@
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
+    <!-- Back to Top Button -->
+    <div class="back-to-top" onclick="scrollToTop()" id="backToTop">
+        <i class="fas fa-arrow-up"></i>
+    </div>
+
     <!-- Header -->
     <header>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <nav class="navbar navbar-expand-lg navbar-dark">
             <div class="container">
-                <!-- Logo/Brand -->
+                <!-- Logo -->
                 <a class="navbar-brand" asp-controller="Home" asp-action="Index">
-                    <i class="fas fa-utensils me-2"></i>
-                    <span class="fw-bold">FoodOrder</span>
+                    <i class="fas fa-utensils me-2"></i>FoodOrder
                 </a>
 
-                <!-- Mobile Toggle Button -->
-                <button class="navbar-toggler" type="button"
-                        data-bs-toggle="collapse" data-bs-target="#navbarMain"
-                        aria-controls="navbarMain" aria-expanded="false"
-                        aria-label="Toggle navigation">
+                <!-- Mobile Toggle -->
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#navbarMain">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
                 <!-- Navbar Links -->
                 <div class="collapse navbar-collapse" id="navbarMain">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <ul class="navbar-nav me-auto">
                         <li class="nav-item">
                             <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")"
                                asp-controller="Home" asp-action="Index">
@@ -306,11 +383,11 @@
                         </li>
                     </ul>
 
-                    <!-- Right Side Navbar -->
+                    <!-- Right Menu -->
                     <ul class="navbar-nav ms-auto align-items-center">
                         @if (User.Identity.IsAuthenticated)
                         {
-                            <!-- Cart Icon for User -->
+                            <!-- Cart Icon (User only) -->
                             @if (!User.IsInRole("Admin"))
                             {
                                 <li class="nav-item me-2">
@@ -318,31 +395,25 @@
                                        data-bs-toggle="tooltip" title="Giỏ hàng">
                                         <i class="fas fa-shopping-cart fa-lg"></i>
                                         <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-badge"
-                                              id="cartCount" style="display: none;">
-                                            0
-                                        </span>
+                                              id="cartCount" style="display: none;">0</span>
                                     </a>
                                 </li>
                             }
 
-                            <!-- User Dropdown Menu -->
+                            <!-- User Dropdown -->
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle d-flex align-items-center" href="#"
-                                   id="userDropdown" role="button" data-bs-toggle="dropdown"
-                                   aria-expanded="false">
+                                   id="userDropdown" role="button" data-bs-toggle="dropdown">
                                     <i class="fas fa-user-circle fa-lg me-1"></i>
                                     <span class="d-none d-lg-inline">
                                         @{
-                                            var displayName = User.Identity.Name?.Split('@')[0] ?? "User";
-                                            if (displayName.Length > 15)
-                                            {
-                                                displayName = displayName.Substring(0, 12) + "...";
-                                            }
+                                            var fullName = User.FindFirst("FullName")?.Value ?? User.Identity.Name?.Split('@')[0] ?? "User";
+                                            if (fullName.Length > 15) fullName = fullName.Substring(0, 12) + "...";
                                         }
-                                        @displayName
+                                        @fullName
                                     </span>
                                 </a>
-                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                <ul class="dropdown-menu dropdown-menu-end">
                                     @if (User.IsInRole("Admin"))
                                     {
                                         <li>
@@ -352,17 +423,17 @@
                                         </li>
                                         <li>
                                             <a class="dropdown-item" asp-area="Admin" asp-controller="Categories" asp-action="Index">
-                                                <i class="fas fa-tags"></i>Quản lý danh mục
+                                                <i class="fas fa-tags"></i>Danh mục
                                             </a>
                                         </li>
                                         <li>
                                             <a class="dropdown-item" asp-area="Admin" asp-controller="FoodItems" asp-action="Index">
-                                                <i class="fas fa-pizza-slice"></i>Quản lý món ăn
+                                                <i class="fas fa-pizza-slice"></i>Món ăn
                                             </a>
                                         </li>
                                         <li>
                                             <a class="dropdown-item" asp-area="Admin" asp-controller="Orders" asp-action="Index">
-                                                <i class="fas fa-truck"></i>Quản lý đơn hàng
+                                                <i class="fas fa-truck"></i>Đơn hàng
                                             </a>
                                         </li>
                                         <li><hr class="dropdown-divider"></li>
@@ -377,6 +448,11 @@
                                         <li>
                                             <a class="dropdown-item" asp-controller="Wallet" asp-action="Index">
                                                 <i class="fas fa-wallet"></i>Ví điện tử
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Wallet" asp-action="Transactions">
+                                                <i class="fas fa-history"></i>Lịch sử giao dịch
                                             </a>
                                         </li>
                                         <li><hr class="dropdown-divider"></li>
@@ -430,7 +506,7 @@
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <i class="fas fa-check-circle me-2"></i>
                 @TempData["SuccessMessage"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         </div>
     }
@@ -441,7 +517,7 @@
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <i class="fas fa-exclamation-circle me-2"></i>
                 @TempData["ErrorMessage"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         </div>
     }
@@ -452,7 +528,7 @@
             <div class="alert alert-warning alert-dismissible fade show" role="alert">
                 <i class="fas fa-exclamation-triangle me-2"></i>
                 @TempData["WarningMessage"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         </div>
     }
@@ -463,7 +539,7 @@
             <div class="alert alert-info alert-dismissible fade show" role="alert">
                 <i class="fas fa-info-circle me-2"></i>
                 @TempData["InfoMessage"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         </div>
     }
@@ -474,86 +550,91 @@
     </main>
 
     <!-- Footer -->
-    <footer class="footer mt-auto py-4">
+    <footer class="footer py-5">
         <div class="container">
             <div class="row g-4">
-                <div class="col-md-4">
-                    <h5 class="mb-3">
+                <div class="col-lg-4">
+                    <h5>
                         <i class="fas fa-utensils me-2"></i>FoodOrder
                     </h5>
-                    <p class="text-white-50">
+                    <p class="text-white-50 mb-3">
                         Ứng dụng đặt đồ ăn trực tuyến nhanh chóng, tiện lợi.
                         Với ví điện tử tích hợp, thanh toán chưa bao giờ dễ dàng hơn.
                     </p>
                     <div class="social-links">
-                        <a href="#" class="text-white me-3" target="_blank">
-                            <i class="fab fa-facebook fa-lg"></i>
-                        </a>
-                        <a href="#" class="text-white me-3" target="_blank">
-                            <i class="fab fa-instagram fa-lg"></i>
-                        </a>
-                        <a href="#" class="text-white me-3" target="_blank">
-                            <i class="fab fa-twitter fa-lg"></i>
-                        </a>
-                        <a href="#" class="text-white" target="_blank">
-                            <i class="fab fa-youtube fa-lg"></i>
-                        </a>
+                        <a href="#" class="me-2"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="me-2"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="me-2"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="me-2"><i class="fab fa-youtube"></i></a>
                     </div>
                 </div>
 
-                <div class="col-md-2">
-                    <h5 class="mb-3">Liên kết</h5>
+                <div class="col-lg-2 col-md-4">
+                    <h5>Liên kết</h5>
                     <ul class="list-unstyled">
                         <li class="mb-2">
-                            <a asp-controller="Home" asp-action="About" class="text-white-50 text-decoration-none">
+                            <a asp-controller="Home" asp-action="About">
                                 <i class="fas fa-chevron-right me-1 small"></i>Giới thiệu
                             </a>
                         </li>
                         <li class="mb-2">
-                            <a asp-controller="Home" asp-action="Contact" class="text-white-50 text-decoration-none">
+                            <a asp-controller="Home" asp-action="Contact">
                                 <i class="fas fa-chevron-right me-1 small"></i>Liên hệ
                             </a>
                         </li>
                         <li class="mb-2">
-                            <a asp-controller="Menu" asp-action="Index" class="text-white-50 text-decoration-none">
+                            <a asp-controller="Menu" asp-action="Index">
                                 <i class="fas fa-chevron-right me-1 small"></i>Thực đơn
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#">
+                                <i class="fas fa-chevron-right me-1 small"></i>Tuyển dụng
                             </a>
                         </li>
                     </ul>
                 </div>
 
-                <div class="col-md-3">
-                    <h5 class="mb-3">Hỗ trợ</h5>
+                <div class="col-lg-3 col-md-4">
+                    <h5>Hỗ trợ</h5>
                     <ul class="list-unstyled">
                         <li class="mb-2">
-                            <a href="#" class="text-white-50 text-decoration-none">
+                            <a href="#">
                                 <i class="fas fa-chevron-right me-1 small"></i>FAQ
                             </a>
                         </li>
                         <li class="mb-2">
-                            <a href="#" class="text-white-50 text-decoration-none">
+                            <a href="#">
                                 <i class="fas fa-chevron-right me-1 small"></i>Chính sách bảo mật
                             </a>
                         </li>
                         <li class="mb-2">
-                            <a href="#" class="text-white-50 text-decoration-none">
+                            <a href="#">
                                 <i class="fas fa-chevron-right me-1 small"></i>Điều khoản sử dụng
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#">
+                                <i class="fas fa-chevron-right me-1 small"></i>Hướng dẫn đặt hàng
                             </a>
                         </li>
                     </ul>
                 </div>
 
-                <div class="col-md-3">
-                    <h5 class="mb-3">Liên hệ</h5>
+                <div class="col-lg-3 col-md-4">
+                    <h5>Liên hệ</h5>
                     <ul class="list-unstyled">
                         <li class="mb-2 text-white-50">
-                            <i class="fas fa-map-marker-alt me-2"></i>123 Đường ABC, Quận 1, TP.HCM
+                            <i class="fas fa-map-marker-alt me-2"></i>
+                            123 Đường ABC, Quận 1, TP.HCM
                         </li>
-                        <li class="mb-2 text-white-50">
-                            <i class="fas fa-phone me-2"></i>1900 1234
+                        <li class="mb-2">
+                            <i class="fas fa-phone me-2"></i>
+                            <a href="tel:19001234">1900 1234</a>
                         </li>
-                        <li class="mb-2 text-white-50">
-                            <i class="fas fa-envelope me-2"></i>support@foodorder.com
+                        <li class="mb-2">
+                            <i class="fas fa-envelope me-2"></i>
+                            <a href="mailto:support@foodorder.com">support@foodorder.com</a>
                         </li>
                     </ul>
                 </div>
@@ -563,12 +644,12 @@
 
             <div class="row">
                 <div class="col-md-6 text-center text-md-start">
-                    <p class="mb-0 text-white-50">
-                        &copy; @DateTime.Now.Year - FoodOrder. All rights reserved.
+                    <p class="mb-0 text-white-50 small">
+                        &copy; @DateTime.Now.Year FoodOrder. All rights reserved.
                     </p>
                 </div>
                 <div class="col-md-6 text-center text-md-end">
-                    <p class="mb-0 text-white-50">
+                    <p class="mb-0 text-white-50 small">
                         <i class="fas fa-heart text-danger me-1"></i>
                         Made with love for food lovers
                     </p>
@@ -580,35 +661,34 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
 
-    <!-- Custom JavaScript -->
     <script>
-        // Khởi tạo tooltips
+        // Tooltips
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
         var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl);
         });
 
-        // Hiển thị loading overlay
-        function showLoading() {
+        // Loading overlay
+        window.showLoading = function() {
             document.getElementById('loadingOverlay').style.display = 'flex';
-        }
+        };
 
-        // Ẩn loading overlay
-        function hideLoading() {
+        window.hideLoading = function() {
             document.getElementById('loadingOverlay').style.display = 'none';
-        }
+        };
 
-        // Hiển thị toast notification
-        function showToast(message, type = 'success') {
+        // Toast notifications
+        window.showToast = function(message, type = 'success') {
             const toastContainer = document.getElementById('toastContainer');
             const toast = document.createElement('div');
             toast.className = `toast-custom toast-${type}`;
             toast.innerHTML = `
-                <i class="fas ${type === 'success' ? 'fa-check-circle text-success' :
-                                 type === 'error' ? 'fa-exclamation-circle text-danger' :
-                                 type === 'warning' ? 'fa-exclamation-triangle text-warning' :
-                                 'fa-info-circle text-info'} fa-lg"></i>
+                <i class="fas ${type === 'success' ? 'fa-check-circle' :
+                                 type === 'error' ? 'fa-exclamation-circle' :
+                                 type === 'warning' ? 'fa-exclamation-triangle' :
+                                 'fa-info-circle'} fa-lg"></i>
                 <span>${message}</span>
             `;
 
@@ -616,22 +696,20 @@
 
             setTimeout(() => {
                 toast.style.animation = 'slideInRight 0.3s reverse';
-                setTimeout(() => {
-                    toast.remove();
-                }, 300);
+                setTimeout(() => toast.remove(), 300);
             }, 3000);
-        }
+        };
 
         // Format currency
-        function formatCurrency(amount) {
+        window.formatCurrency = function(amount) {
             return new Intl.NumberFormat('vi-VN', {
                 style: 'currency',
                 currency: 'VND'
             }).format(amount);
-        }
+        };
 
-        // Cập nhật số lượng giỏ hàng
-        function updateCartCount() {
+        // Update cart count
+        window.updateCartCount = function() {
             @if (User.Identity.IsAuthenticated && !User.IsInRole("Admin"))
             {
                     <text>
@@ -645,38 +723,43 @@
                             }
                         })
                         .fail(function() {
-                            console.error('Không thể cập nhật số lượng giỏ hàng');
+                            console.error('Không thể cập nhật giỏ hàng');
                         });
                     </text>
             }
-        }
+        };
+
+        // Scroll to top
+        window.scrollToTop = function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
 
         $(document).ready(function() {
-            // Cập nhật số lượng giỏ hàng khi trang load
+            // Update cart count
             updateCartCount();
 
-            // Xử lý form logout
+            // Logout confirmation
             $('#logoutForm').on('submit', function(e) {
                 if (!confirm('Bạn có chắc muốn đăng xuất?')) {
                     e.preventDefault();
                 }
             });
 
-            // Tự động ẩn alerts sau 5 giây
-            setTimeout(function() {
+            // Auto hide alerts
+            setTimeout(() => {
                 $('.alert').fadeOut('slow');
             }, 5000);
 
-            // Hiệu ứng cho dropdown
-            $('.dropdown').on('show.bs.dropdown', function() {
-                $(this).find('.dropdown-menu').first().stop(true, true).slideDown();
+            // Back to top button
+            $(window).scroll(function() {
+                if ($(this).scrollTop() > 300) {
+                    $('#backToTop').fadeIn();
+                } else {
+                    $('#backToTop').fadeOut();
+                }
             });
 
-            $('.dropdown').on('hide.bs.dropdown', function() {
-                $(this).find('.dropdown-menu').first().stop(true, true).slideUp();
-            });
-
-            // Xử lý AJAX errors
+            // Global AJAX error handling
             $(document).ajaxError(function(event, jqxhr, settings, thrownError) {
                 if (jqxhr.status === 401) {
                     window.location.href = '/Account/Login';

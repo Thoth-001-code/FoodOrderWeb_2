@@ -18,6 +18,8 @@ namespace FoodOrderWeb.ViewModels
         [StringLength(100, MinimumLength = 6, ErrorMessage = "Mật khẩu phải từ 6-100 ký tự")]
         [DataType(DataType.Password)]
         [Display(Name = "Mật khẩu")]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$",
+            ErrorMessage = "Mật khẩu phải chứa ít nhất 1 chữ hoa, 1 chữ thường và 1 số")]
         public string Password { get; set; }
 
         [DataType(DataType.Password)]
@@ -27,10 +29,16 @@ namespace FoodOrderWeb.ViewModels
 
         [Display(Name = "Số điện thoại")]
         [Phone(ErrorMessage = "Số điện thoại không đúng định dạng")]
+        [RegularExpression(@"^(0|\+84)[3-9][0-9]{8}$",
+            ErrorMessage = "Số điện thoại không hợp lệ")]
         public string? PhoneNumber { get; set; }
 
         [StringLength(255)]
         [Display(Name = "Địa chỉ")]
         public string? Address { get; set; }
+
+        [Display(Name = "Đồng ý với điều khoản")]
+        [Range(typeof(bool), "true", "true", ErrorMessage = "Bạn phải đồng ý với điều khoản")]
+        public bool AgreeTerms { get; set; }
     }
 }

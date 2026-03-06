@@ -4,65 +4,253 @@
     ViewData["Title"] = $"Chi tiết đơn hàng #{Model.Id}";
 }
 
-<div class="container mt-4">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
-            <li class="breadcrumb-item"><a asp-action="MyOrders">Đơn hàng của tôi</a></li>
-            <li class="breadcrumb-item active">Chi tiết đơn hàng #@Model.Id</li>
-        </ol>
-    </nav>
+<!-- Breadcrumb -->
+<section class="bg-light py-3">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item">
+                    <a asp-controller="Home" asp-action="Index" class="text-decoration-none">
+                        <i class="fas fa-home me-1"></i>Trang chủ
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a asp-action="MyOrders" class="text-decoration-none">
+                        <i class="fas fa-clipboard-list me-1"></i>Đơn hàng của tôi
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">Đơn hàng #@Model.Id</li>
+            </ol>
+        </nav>
+    </div>
+</section>
 
-    <div class="card shadow mb-4">
-        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <h4 class="mb-0">Đơn hàng #@Model.Id</h4>
-            @switch (Model.Status)
-            {
-                case OrderStatus.Pending:
-                    <span class="badge bg-warning fs-6">Chờ xác nhận</span>
-                    break;
-                case OrderStatus.Confirmed:
-                    <span class="badge bg-info fs-6">Đã xác nhận</span>
-                    break;
-                case OrderStatus.Preparing:
-                    <span class="badge bg-primary fs-6">Đang chuẩn bị</span>
-                    break;
-                case OrderStatus.Delivering:
-                    <span class="badge bg-secondary fs-6">Đang giao</span>
-                    break;
-                case OrderStatus.Delivered:
-                    <span class="badge bg-success fs-6">Đã giao</span>
-                    break;
-                case OrderStatus.Cancelled:
-                    <span class="badge bg-danger fs-6">Đã hủy</span>
-                    break;
-            }
-        </div>
-        <div class="card-body">
-            <div class="row mb-4">
-                <div class="col-md-6">
-                    <h5>Thông tin đơn hàng</h5>
-                    <table class="table table-borderless">
-                        <tr>
-                            <td><strong>Ngày đặt:</strong></td>
-                            <td>@Model.OrderDate.ToString("dd/MM/yyyy HH:mm:ss")</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Phương thức thanh toán:</strong></td>
-                            <td>
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Order Header -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4 class="fw-bold mb-0">
+                                <i class="fas fa-receipt me-2 text-primary"></i>
+                                Đơn hàng #@Model.Id
+                            </h4>
+                            @switch (Model.Status)
+                            {
+                                case OrderStatus.Pending:
+                                    <span class="badge bg-warning fs-6">Chờ xác nhận</span>
+                                    break;
+                                case OrderStatus.Confirmed:
+                                    <span class="badge bg-info fs-6">Đã xác nhận</span>
+                                    break;
+                                case OrderStatus.Preparing:
+                                    <span class="badge bg-primary fs-6">Đang chuẩn bị</span>
+                                    break;
+                                case OrderStatus.Delivering:
+                                    <span class="badge bg-secondary fs-6">Đang giao</span>
+                                    break;
+                                case OrderStatus.Delivered:
+                                    <span class="badge bg-success fs-6">Đã giao</span>
+                                    break;
+                                case OrderStatus.Cancelled:
+                                    <span class="badge bg-danger fs-6">Đã hủy</span>
+                                    break;
+                            }
+                        </div>
+                        <p class="text-muted">
+                            <i class="far fa-calendar-alt me-2"></i>
+                            Ngày đặt: @Model.OrderDate.ToString("dd/MM/yyyy HH:mm:ss")
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Order Progress -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-4">
+                            <i class="fas fa-chart-line me-2 text-primary"></i>
+                            Tiến trình đơn hàng
+                        </h5>
+                        <div class="progress-tracker">
+                            <div class="progress-step @(Model.Status >= OrderStatus.Pending ? "completed" : "")">
+                                <div class="step-icon">
+                                    <i class="fas @(Model.Status >= OrderStatus.Pending ? "fa-check-circle" : "fa-circle")"></i>
+                                </div>
+                                <div class="step-label">Đặt hàng</div>
+                                <div class="step-date">@Model.OrderDate.ToString("dd/MM HH:mm")</div>
+                            </div>
+                            <div class="progress-step @(Model.Status >= OrderStatus.Confirmed ? "completed" : "")">
+                                <div class="step-icon">
+                                    <i class="fas @(Model.Status >= OrderStatus.Confirmed ? "fa-check-circle" : "fa-circle")"></i>
+                                </div>
+                                <div class="step-label">Xác nhận</div>
+                                @if (Model.Status >= OrderStatus.Confirmed)
+                                {
+                                    <div class="step-date">@Model.OrderDate.AddHours(1).ToString("dd/MM HH:mm")</div>
+                                }
+                            </div>
+                            <div class="progress-step @(Model.Status >= OrderStatus.Preparing ? "completed" : "")">
+                                <div class="step-icon">
+                                    <i class="fas @(Model.Status >= OrderStatus.Preparing ? "fa-check-circle" : "fa-circle")"></i>
+                                </div>
+                                <div class="step-label">Chuẩn bị</div>
+                            </div>
+                            <div class="progress-step @(Model.Status >= OrderStatus.Delivering ? "completed" : "")">
+                                <div class="step-icon">
+                                    <i class="fas @(Model.Status >= OrderStatus.Delivering ? "fa-check-circle" : "fa-circle")"></i>
+                                </div>
+                                <div class="step-label">Giao hàng</div>
+                            </div>
+                            <div class="progress-step @(Model.Status >= OrderStatus.Delivered ? "completed" : "")">
+                                <div class="step-icon">
+                                    <i class="fas @(Model.Status >= OrderStatus.Delivered ? "fa-check-circle" : "fa-circle")"></i>
+                                </div>
+                                <div class="step-label">Hoàn thành</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Items -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0 fw-bold">
+                            <i class="fas fa-shopping-bag me-2 text-primary"></i>
+                            Chi tiết món ăn
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        @if (Model.OrderItems != null && Model.OrderItems.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th class="px-4">Món ăn</th>
+                                            <th class="text-center">Số lượng</th>
+                                            <th class="text-end">Đơn giá</th>
+                                            <th class="text-end">Thành tiền</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.OrderItems)
+                                        {
+                                            @if (item != null && item.FoodItem != null)
+                                            {
+                                                <tr>
+                                                    <td class="px-4">
+                                                        <div class="d-flex align-items-center">
+                                                            <img src="@(item.FoodItem.ImageUrl ?? "https://images.unsplash.com/photo-1546069901-ba9596a5e864?w=100")"
+                                                                 width="50" height="50" class="rounded me-3"
+                                                                 style="object-fit: cover;">
+                                                            <div>
+                                                                <span class="fw-bold d-block">@item.FoodItem.Name</span>
+                                                                <small class="text-muted">@item.FoodItem.Category?.Name</small>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td class="text-center align-middle">@item.Quantity</td>
+                                                    <td class="text-end align-middle">@item.Price.ToString("#,0")đ</td>
+                                                    <td class="text-end align-middle fw-bold text-primary">
+                                                        @((item.Quantity * item.Price).ToString("#,0"))đ
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
+                                    </tbody>
+                                    <tfoot class="table-light">
+                                        <tr>
+                                            <th colspan="3" class="text-end px-4">Tạm tính:</th>
+                                            <th class="text-end px-4">@Model.Subtotal.ToString("#,0")đ</th>
+                                        </tr>
+                                        <tr>
+                                            <th colspan="3" class="text-end px-4">Phí giao hàng:</th>
+                                            <th class="text-end px-4">@Model.ShippingFee.ToString("#,0")đ</th>
+                                        </tr>
+                                        @if (Model.Discount > 0)
+                                        {
+                                            <tr>
+                                                <th colspan="3" class="text-end px-4">Giảm giá:</th>
+                                                <th class="text-end px-4 text-danger">-@Model.Discount.ToString("#,0")đ</th>
+                                            </tr>
+                                        }
+                                        <tr>
+                                            <th colspan="3" class="text-end px-4 fs-5">Tổng cộng:</th>
+                                            <th class="text-end px-4 fs-5 text-primary">@Model.TotalAmount.ToString("#,0")đ</th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center py-4">
+                                <p class="text-muted mb-0">Không có thông tin món ăn</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <!-- Shipping Info -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0 fw-bold">
+                            <i class="fas fa-truck me-2 text-primary"></i>
+                            Thông tin giao hàng
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="text-muted small">Người nhận</label>
+                            <p class="fw-bold mb-0">@Model.ReceiverName</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="text-muted small">Số điện thoại</label>
+                            <p class="fw-bold mb-0">@Model.PhoneNumber</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="text-muted small">Địa chỉ</label>
+                            <p class="fw-bold mb-0">@Model.ShippingAddress</p>
+                        </div>
+                        @if (!string.IsNullOrEmpty(Model.Notes))
+                        {
+                            <div>
+                                <label class="text-muted small">Ghi chú</label>
+                                <p class="mb-0">@Model.Notes</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Payment Info -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0 fw-bold">
+                            <i class="fas fa-credit-card me-2 text-primary"></i>
+                            Thông tin thanh toán
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="text-muted small">Phương thức</label>
+                            <p class="fw-bold mb-0">
                                 @if (Model.PaymentMethod == PaymentMethod.Cash)
                                 {
-                                    <span>Tiền mặt</span>
+                                    <span><i class="fas fa-money-bill-wave text-success me-2"></i>Tiền mặt</span>
                                 }
                                 else
                                 {
-                                    <span>Ví điện tử</span>
+                                    <span><i class="fas fa-wallet text-primary me-2"></i>Ví điện tử</span>
                                 }
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><strong>Trạng thái thanh toán:</strong></td>
-                            <td>
+                            </p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="text-muted small">Trạng thái</label>
+                            <p class="mb-0">
                                 @if (Model.IsPaid)
                                 {
                                     <span class="badge bg-success">Đã thanh toán</span>
@@ -71,99 +259,222 @@
                                 {
                                     <span class="badge bg-warning">Chưa thanh toán</span>
                                 }
-                            </td>
-                        </tr>
-                    </table>
+                            </p>
+                        </div>
+                        @if (ViewBag.Transaction != null)
+                        {
+                            <div>
+                                <label class="text-muted small">Mã giao dịch</label>
+                                <p class="mb-0">
+                                    <a asp-controller="Wallet" asp-action="Transaction" asp-route-id="@ViewBag.Transaction.Id"
+                                       class="text-decoration-none">
+                                        #@ViewBag.Transaction.Id
+                                    </a>
+                                </p>
+                            </div>
+                        }
+                    </div>
                 </div>
 
-                <div class="col-md-6">
-                    <h5>Thông tin giao hàng</h5>
-                    <table class="table table-borderless">
-                        <tr>
-                            <td><strong>Người nhận:</strong></td>
-                            <td>@Model.ReceiverName</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Số điện thoại:</strong></td>
-                            <td>@Model.PhoneNumber</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Địa chỉ:</strong></td>
-                            <td>@Model.ShippingAddress</td>
-                        </tr>
-                        @if (!string.IsNullOrEmpty(Model.Notes))
-                        {
-                            <tr>
-                                <td><strong>Ghi chú:</strong></td>
-                                <td>@Model.Notes</td>
-                            </tr>
-                        }
-                    </table>
+                <!-- Actions -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a asp-action="MyOrders" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Quay lại danh sách
+                            </a>
+
+                            @if (Model.Status == OrderStatus.Pending)
+                            {
+                                <button onclick="cancelOrder(@Model.Id)" class="btn btn-danger">
+                                    <i class="fas fa-times-circle me-2"></i>Hủy đơn hàng
+                                </button>
+                            }
+
+                            @if (Model.Status == OrderStatus.Delivered)
+                            {
+                                <button onclick="reorder(@Model.Id)" class="btn btn-primary">
+                                    <i class="fas fa-redo me-2"></i>Đặt lại
+                                </button>
+                                <a asp-action="Invoice" asp-route-id="@Model.Id" class="btn btn-outline-success">
+                                    <i class="fas fa-file-invoice me-2"></i>Xem hóa đơn
+                                </a>
+                            }
+
+                            @if (Model.Status == OrderStatus.Delivering)
+                            {
+                                <a asp-action="Track" asp-route-id="@Model.Id" class="btn btn-info text-white">
+                                    <i class="fas fa-map-marker-alt me-2"></i>Theo dõi đơn hàng
+                                </a>
+                            }
+                        </div>
+                    </div>
                 </div>
-            </div>
-
-            <h5>Chi tiết món ăn</h5>
-            <div class="table-responsive">
-                <table class="table table-bordered">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Món ăn</th>
-                            <th class="text-center">Số lượng</th>
-                            <th class="text-end">Đơn giá</th>
-                            <th class="text-end">Thành tiền</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in Model.OrderItems)
-                        {
-                            <tr>
-                                <td>@item.FoodItem.Name</td>
-                                <td class="text-center">@item.Quantity</td>
-                                <td class="text-end">@item.Price.ToString("#,0")đ</td>
-                                <td class="text-end">@((item.Quantity * item.Price).ToString("#,0"))đ</td>
-                            </tr>
-                        }
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <th colspan="3" class="text-end">Tổng cộng:</th>
-                            <th class="text-end text-primary">@Model.TotalAmount.ToString("#,0")đ</th>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
-
-            <div class="mt-4">
-                <a asp-action="MyOrders" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left me-2"></i>Quay lại
-                </a>
-
-                @if (Model.Status == OrderStatus.Pending)
-                {
-                    <button onclick="cancelOrder(@Model.Id)" class="btn btn-danger">
-                        <i class="fas fa-times-circle me-2"></i>Hủy đơn hàng
-                    </button>
-                }
             </div>
         </div>
     </div>
-</div>
+</section>
 
 @section Scripts {
     <script>
         function cancelOrder(orderId) {
             if (confirm('Bạn có chắc muốn hủy đơn hàng này?')) {
-                $.post('/Order/Cancel/' + orderId, {
-                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
-                }).done(function(response) {
-                    if (response.success) {
-                        alert(response.message);
-                        location.reload();
-                    } else {
-                        alert(response.message);
+                var token = $('input[name="__RequestVerificationToken"]').val();
+
+                $.ajax({
+                    url: '/Order/Cancel/' + orderId,
+                    type: 'POST',
+                    data: {
+                        __RequestVerificationToken: token
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            if (typeof showToast === 'function') {
+                                showToast('Hủy đơn hàng thành công', 'success');
+                            } else {
+                                alert('Hủy đơn hàng thành công');
+                            }
+                            setTimeout(function() {
+                                location.reload();
+                            }, 1500);
+                        } else {
+                            if (typeof showToast === 'function') {
+                                showToast(response.message || 'Có lỗi xảy ra', 'error');
+                            } else {
+                                alert(response.message || 'Có lỗi xảy ra');
+                            }
+                        }
+                    },
+                    error: function() {
+                        if (typeof showToast === 'function') {
+                            showToast('Có lỗi xảy ra khi hủy đơn hàng', 'error');
+                        } else {
+                            alert('Có lỗi xảy ra khi hủy đơn hàng');
+                        }
+                    }
+                });
+            }
+        }
+
+        function reorder(orderId) {
+            if (confirm('Thêm các món từ đơn hàng này vào giỏ?')) {
+                var token = $('input[name="__RequestVerificationToken"]').val();
+
+                $.ajax({
+                    url: '/Order/Reorder/' + orderId,
+                    type: 'POST',
+                    data: {
+                        __RequestVerificationToken: token
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            if (typeof showToast === 'function') {
+                                showToast('Đã thêm vào giỏ hàng', 'success');
+                            } else {
+                                alert('Đã thêm vào giỏ hàng');
+                            }
+                            setTimeout(function() {
+                                window.location.href = '/Cart';
+                            }, 1500);
+                        } else {
+                            if (typeof showToast === 'function') {
+                                showToast(response.message || 'Có lỗi xảy ra', 'error');
+                            } else {
+                                alert(response.message || 'Có lỗi xảy ra');
+                            }
+                        }
+                    },
+                    error: function() {
+                        if (typeof showToast === 'function') {
+                            showToast('Có lỗi xảy ra khi thêm vào giỏ', 'error');
+                        } else {
+                            alert('Có lỗi xảy ra khi thêm vào giỏ');
+                        }
                     }
                 });
             }
         }
     </script>
 }
+
+<style>
+    .progress-tracker {
+        display: flex;
+        justify-content: space-between;
+        position: relative;
+        padding: 0 10px;
+    }
+
+        .progress-tracker::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 50px;
+            right: 50px;
+            height: 2px;
+            background: #e0e0e0;
+            z-index: 1;
+        }
+
+    .progress-step {
+        text-align: center;
+        position: relative;
+        z-index: 2;
+        flex: 1;
+    }
+
+        .progress-step.completed .step-icon {
+            color: #28a745;
+        }
+
+        .progress-step .step-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-size: 1.2rem;
+            color: #999;
+            transition: all 0.3s;
+        }
+
+        .progress-step.completed .step-icon {
+            border-color: #28a745;
+            background: #28a745;
+            color: white;
+        }
+
+    .step-label {
+        font-size: 0.9rem;
+        color: #666;
+        font-weight: 500;
+    }
+
+    .step-date {
+        font-size: 0.8rem;
+        color: #999;
+    }
+
+    .progress-step.completed .step-label {
+        color: #28a745;
+    }
+
+    @@media (max-width: 768px) {
+        .progress-tracker {
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .progress-step {
+            flex: 0 0 calc(50% - 10px);
+        }
+
+        .progress-tracker::before {
+            display: none;
+        }
+    }
+</style>

@@ -27,11 +27,9 @@ namespace FoodOrderWeb.Controllers
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-                // Lấy thông tin ví
                 var wallet = await _context.Wallets
                     .FirstOrDefaultAsync(w => w.UserId == userId);
 
-                // Nếu chưa có ví thì tạo mới (dự phòng)
                 if (wallet == null)
                 {
                     wallet = new Wallet
@@ -57,11 +55,11 @@ namespace FoodOrderWeb.Controllers
                 // Thống kê
                 ViewBag.TotalDeposit = await _context.Transactions
                     .Where(t => t.WalletId == wallet.Id && t.Type == TransactionType.Deposit)
-                    .SumAsync(t => t.Amount);
+                    .SumAsync(t => (decimal?)t.Amount) ?? 0;
 
                 ViewBag.TotalSpent = await _context.Transactions
                     .Where(t => t.WalletId == wallet.Id && t.Type == TransactionType.Payment)
-                    .SumAsync(t => t.Amount);
+                    .SumAsync(t => (decimal?)t.Amount) ?? 0;
 
                 ViewBag.TransactionCount = await _context.Transactions
                     .CountAsync(t => t.WalletId == wallet.Id);
@@ -120,7 +118,7 @@ namespace FoodOrderWeb.Controllers
                     Amount = model.Amount,
                     BalanceBefore = balanceBefore,
                     BalanceAfter = wallet.Balance,
-                    Description = model.Description ?? $"Nạp tiền vào ví",
+                    Description = model.Description ?? "Nạp tiền vào ví",
                     CreatedAt = DateTime.Now
                 };
 
@@ -155,6 +153,7 @@ namespace FoodOrderWeb.Controllers
                     return NotFound();
                 }
 
+                // Lấy transactions, không phải fooditems
                 var query = _context.Transactions
                     .Where(t => t.WalletId == wallet.Id)
                     .Include(t => t.Order)
@@ -179,11 +178,6 @@ namespace FoodOrderWeb.Controllers
                     .Take(pageSize)
                     .ToListAsync();
 
-                ViewBag.CurrentPage = page;
-                ViewBag.TotalPages = totalPages;
-                ViewBag.TotalItems = totalItems;
-                ViewBag.Wallet = wallet;
-
                 // Thống kê theo loại
                 ViewBag.DepositCount = await _context.Transactions
                     .CountAsync(t => t.WalletId == wallet.Id && t.Type == TransactionType.Deposit);
@@ -192,11 +186,57 @@ namespace FoodOrderWeb.Controllers
                 ViewBag.RefundCount = await _context.Transactions
                     .CountAsync(t => t.WalletId == wallet.Id && t.Type == TransactionType.Refund);
 
+                ViewBag.TotalDeposit = await _context.Transactions
+                    .Where(t => t.WalletId == wallet.Id && t.Type == TransactionType.Deposit)
+                    .SumAsync(t => (decimal?)t.Amount) ?? 0;
+
+                ViewBag.TotalSpent = await _context.Transactions
+                    .Where(t => t.WalletId == wallet.Id && t.Type == TransactionType.Payment)
+                    .SumAsync(t => (decimal?)t.Amount) ?? 0;
+
+                ViewBag.TotalRefund = await _context.Transactions
+                    .Where(t => t.WalletId == wallet.Id && t.Type == TransactionType.Refund)
+                    .SumAsync(t => (decimal?)t.Amount) ?? 0;
+
+                // Thống kê theo thời gian
+                var today = DateTime.Today;
+                var startOfWeek = today.AddDays(-(int)today.DayOfWeek + 1);
+                var startOfMonth = new DateTime(today.Year, today.Month, 1);
+
+                ViewBag.TodayCount = await _context.Transactions
+                    .CountAsync(t => t.WalletId == wallet.Id && t.CreatedAt.Date == today);
+                ViewBag.TodayAmount = await _context.Transactions
+                    .Where(t => t.WalletId == wallet.Id && t.CreatedAt.Date == today)
+                    .SumAsync(t => (decimal?)t.Amount) ?? 0;
+
+                ViewBag.WeekCount = await _context.Transactions
+                    .CountAsync(t => t.WalletId == wallet.Id && t.CreatedAt >= startOfWeek);
+                ViewBag.WeekAmount = await _context.Transactions
+                    .Where(t => t.WalletId == wallet.Id && t.CreatedAt >= startOfWeek)
+                    .SumAsync(t => (decimal?)t.Amount) ?? 0;
+
+                ViewBag.MonthCount = await _context.Transactions
+                    .CountAsync(t => t.WalletId == wallet.Id && t.CreatedAt >= startOfMonth);
+                ViewBag.MonthAmount = await _context.Transactions
+                    .Where(t => t.WalletId == wallet.Id && t.CreatedAt >= startOfMonth)
+                    .SumAsync(t => (decimal?)t.Amount) ?? 0;
+
+                ViewBag.AvgTransaction = transactions.Any()
+                    ? transactions.Average(t => t.Amount)
+                    : 0;
+
+                ViewBag.CurrentPage = page;
+                ViewBag.TotalPages = totalPages;
+                ViewBag.TotalItems = totalItems;
+                ViewBag.Wallet = wallet;
+
+                // TRẢ VỀ LIST<TRANSACTION>
                 return View(transactions);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Lỗi khi tải lịch sử giao dịch");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải lịch sử giao dịch";
                 return View(new List<Transaction>());
             }
         }
@@ -226,18 +266,19 @@ namespace FoodOrderWeb.Controllers
                     return NotFound();
                 }
 
-                return View(transaction);
+                return PartialView("_TransactionDetail", transaction);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Lỗi khi tải chi tiết giao dịch {TransactionId}", id);
+                _logger.LogError(ex, "Lỗi khi tải chi tiết giao dịch");
                 return NotFound();
             }
         }
 
-        // GET: /Wallet/Statement
-        [HttpGet]
-        public async Task<IActionResult> Statement(DateTime? fromDate, DateTime? toDate)
+        // POST: /Wallet/Withdraw (nếu có chức năng rút tiền)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Withdraw(decimal amount)
         {
             try
             {
@@ -247,46 +288,40 @@ namespace FoodOrderWeb.Controllers
 
                 if (wallet == null)
                 {
-                    return NotFound();
+                    return Json(new { success = false, message = "Không tìm thấy ví" });
                 }
 
-                // Mặc định là 30 ngày gần nhất
-                fromDate = fromDate ?? DateTime.Now.AddDays(-30);
-                toDate = toDate ?? DateTime.Now;
+                if (wallet.Balance < amount)
+                {
+                    return Json(new { success = false, message = "Số dư không đủ" });
+                }
 
-                var transactions = await _context.Transactions
-                    .Where(t => t.WalletId == wallet.Id &&
-                                t.CreatedAt.Date >= fromDate.Value.Date &&
-                                t.CreatedAt.Date <= toDate.Value.Date)
-                    .OrderBy(t => t.CreatedAt)
-                    .ToListAsync();
+                var balanceBefore = wallet.Balance;
 
-                ViewBag.FromDate = fromDate.Value.ToString("yyyy-MM-dd");
-                ViewBag.ToDate = toDate.Value.ToString("yyyy-MM-dd");
-                ViewBag.Wallet = wallet;
-                ViewBag.OpeningBalance = await GetOpeningBalance(wallet.Id, fromDate.Value);
-                ViewBag.ClosingBalance = wallet.Balance;
-                ViewBag.TotalDeposit = transactions.Where(t => t.Type == TransactionType.Deposit).Sum(t => t.Amount);
-                ViewBag.TotalPayment = transactions.Where(t => t.Type == TransactionType.Payment).Sum(t => t.Amount);
+                wallet.Balance -= amount;
+                wallet.LastUpdated = DateTime.Now;
 
-                return View(transactions);
+                var transaction = new Transaction
+                {
+                    WalletId = wallet.Id,
+                    Type = TransactionType.Refund,
+                    Amount = amount,
+                    BalanceBefore = balanceBefore,
+                    BalanceAfter = wallet.Balance,
+                    Description = "Rút tiền từ ví",
+                    CreatedAt = DateTime.Now
+                };
+
+                _context.Transactions.Add(transaction);
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true, message = "Rút tiền thành công" });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Lỗi khi tạo sao kê");
-                return RedirectToAction("Index");
+                _logger.LogError(ex, "Lỗi khi rút tiền");
+                return Json(new { success = false, message = "Có lỗi xảy ra" });
             }
-        }
-
-        // Helper method to get opening balance
-        private async Task<decimal> GetOpeningBalance(int walletId, DateTime date)
-        {
-            var lastTransaction = await _context.Transactions
-                .Where(t => t.WalletId == walletId && t.CreatedAt.Date < date.Date)
-                .OrderByDescending(t => t.CreatedAt)
-                .FirstOrDefaultAsync();
-
-            return lastTransaction?.BalanceAfter ?? 0;
         }
     }
 }

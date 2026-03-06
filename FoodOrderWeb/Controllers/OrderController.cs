@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using FoodOrderWeb.Data;
 using FoodOrderWeb.Models;
+using FoodOrderWeb.ViewModels;
 using System.Security.Claims;
 
 namespace FoodOrderWeb.Controllers
@@ -20,6 +21,7 @@ namespace FoodOrderWeb.Controllers
         }
 
         // GET: /Order/MyOrders
+        [HttpGet]
         public async Task<IActionResult> MyOrders(int page = 1, string status = null)
         {
             try
@@ -27,9 +29,12 @@ namespace FoodOrderWeb.Controllers
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 int pageSize = 10;
 
+                // QUAN TRỌNG: Include đầy đủ để tránh null
                 var query = _context.Orders
                     .Where(o => o.UserId == userId)
                     .Include(o => o.OrderItems)
+                        .ThenInclude(oi => oi.FoodItem)
+                    .Include(o => o.User)
                     .AsQueryable();
 
                 // Lọc theo trạng thái
@@ -46,6 +51,7 @@ namespace FoodOrderWeb.Controllers
                 var totalItems = await query.CountAsync();
                 var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
 
+                // LUÔN TRẢ VỀ LIST, KHÔNG BAO GIỜ NULL
                 var orders = await query
                     .Skip((page - 1) * pageSize)
                     .Take(pageSize)
@@ -55,9 +61,16 @@ namespace FoodOrderWeb.Controllers
                 ViewBag.TotalOrders = totalItems;
                 ViewBag.TotalSpent = await _context.Orders
                     .Where(o => o.UserId == userId && o.Status == OrderStatus.Delivered)
-                    .SumAsync(o => o.TotalAmount);
+                    .SumAsync(o => (decimal?)o.TotalAmount) ?? 0;
+
                 ViewBag.PendingCount = await _context.Orders
                     .CountAsync(o => o.UserId == userId && o.Status == OrderStatus.Pending);
+                ViewBag.ConfirmedCount = await _context.Orders
+                    .CountAsync(o => o.UserId == userId && o.Status == OrderStatus.Confirmed);
+                ViewBag.PreparingCount = await _context.Orders
+                    .CountAsync(o => o.UserId == userId && o.Status == OrderStatus.Preparing);
+                ViewBag.DeliveringCount = await _context.Orders
+                    .CountAsync(o => o.UserId == userId && o.Status == OrderStatus.Delivering);
                 ViewBag.DeliveredCount = await _context.Orders
                     .CountAsync(o => o.UserId == userId && o.Status == OrderStatus.Delivered);
                 ViewBag.CancelledCount = await _context.Orders
@@ -66,16 +79,18 @@ namespace FoodOrderWeb.Controllers
                 ViewBag.CurrentPage = page;
                 ViewBag.TotalPages = totalPages;
 
-                return View(orders);
+                return View(orders ?? new List<Order>());
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Lỗi khi tải đơn hàng của user");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải đơn hàng";
                 return View(new List<Order>());
             }
         }
 
         // GET: /Order/Details/5
+        [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
             try
@@ -224,7 +239,7 @@ namespace FoodOrderWeb.Controllers
             }
         }
 
-        // GET: /Order/Reorder/5
+        // POST: /Order/Reorder/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Reorder(int id)
@@ -257,11 +272,23 @@ namespace FoodOrderWeb.Controllers
                 // Thêm các món từ đơn hàng cũ vào giỏ
                 foreach (var orderItem in order.OrderItems)
                 {
+                    // Kiểm tra món còn bán không
+                    var foodItem = await _context.FoodItems
+                        .FirstOrDefaultAsync(f => f.Id == orderItem.FoodItemId && f.IsAvailable);
+
+                    if (foodItem == null)
+                    {
+                        continue;
+                    }
+
                     var existingItem = cart.CartItems?.FirstOrDefault(ci => ci.FoodItemId == orderItem.FoodItemId);
 
                     if (existingItem != null)
                     {
-                        existingItem.Quantity += orderItem.Quantity;
+                        if (existingItem.Quantity + orderItem.Quantity <= 10)
+                        {
+                            existingItem.Quantity += orderItem.Quantity;
+                        }
                     }
                     else
                     {
@@ -284,6 +311,34 @@ namespace FoodOrderWeb.Controllers
             {
                 _logger.LogError(ex, "Lỗi khi đặt lại đơn hàng {OrderId}", id);
                 return Json(new { success = false, message = "Có lỗi xảy ra" });
+            }
+        }
+
+        // GET: /Order/Invoice/5
+        [HttpGet]
+        public async Task<IActionResult> Invoice(int id)
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                var order = await _context.Orders
+                    .Include(o => o.OrderItems)
+                        .ThenInclude(oi => oi.FoodItem)
+                    .Include(o => o.User)
+                    .FirstOrDefaultAsync(o => o.Id == id && o.UserId == userId);
+
+                if (order == null)
+                {
+                    return NotFound();
+                }
+
+                return View(order);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi tạo hóa đơn cho đơn hàng {OrderId}", id);
+                return NotFound();
             }
         }
     }

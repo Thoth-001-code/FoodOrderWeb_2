@@ -4,119 +4,241 @@
     ViewData["Title"] = "Thanh toán";
 }
 
-<div class="container mt-4">
-    <h2 class="mb-4">
-        <i class="fas fa-credit-card me-2"></i>Thanh toán
-    </h2>
+<!-- Breadcrumb -->
+<section class="bg-light py-3">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a asp-action="Index">Giỏ hàng</a></li>
+                <li class="breadcrumb-item active">Thanh toán</li>
+            </ol>
+        </nav>
+    </div>
+</section>
 
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card shadow mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Thông tin giao hàng</h5>
-                </div>
-                <div class="card-body">
-                    <form asp-action="PlaceOrder" method="post" id="orderForm">
-                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<section class="py-5">
+    <div class="container">
+        <h1 class="display-5 fw-bold mb-4">
+            <i class="fas fa-credit-card me-2 text-primary"></i>
+            Thanh toán
+        </h1>
 
-                        <div class="mb-3">
-                            <label asp-for="ReceiverName" class="form-label"></label>
-                            <input asp-for="ReceiverName" class="form-control" />
-                            <span asp-validation-for="ReceiverName" class="text-danger"></span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="PhoneNumber" class="form-label"></label>
-                            <input asp-for="PhoneNumber" class="form-control" />
-                            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="ShippingAddress" class="form-label"></label>
-                            <textarea asp-for="ShippingAddress" class="form-control" rows="2"></textarea>
-                            <span asp-validation-for="ShippingAddress" class="text-danger"></span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="Notes" class="form-label"></label>
-                            <textarea asp-for="Notes" class="form-control" rows="2"
-                                      placeholder="Ghi chú về đơn hàng (không bắt buộc)..."></textarea>
-                            <span asp-validation-for="Notes" class="text-danger"></span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Phương thức thanh toán</label>
-                            <div class="row">
-                                <div class="col-md-6 mb-2">
-                                    <div class="form-check border rounded p-3">
-                                        <input class="form-check-input" type="radio"
-                                               name="PaymentMethod" id="paymentCash" value="0" checked>
-                                        <label class="form-check-label" for="paymentCash">
-                                            <i class="fas fa-money-bill-wave text-success me-2"></i>
-                                            <strong>Tiền mặt</strong>
-                                            <p class="text-muted small mb-0">Thanh toán khi nhận hàng</p>
-                                        </label>
-                                    </div>
+        <div class="row">
+            <div class="col-lg-8 mb-4">
+                <!-- Checkout Steps -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <div class="row g-0">
+                            <div class="col-4 text-center">
+                                <div class="checkout-step active">
+                                    <div class="step-number mx-auto mb-2">1</div>
+                                    <span class="step-title">Giỏ hàng</span>
                                 </div>
-                                <div class="col-md-6 mb-2">
-                                    <div class="form-check border rounded p-3">
-                                        <input class="form-check-input" type="radio"
-                                               name="PaymentMethod" id="paymentWallet" value="1">
-                                        <label class="form-check-label" for="paymentWallet">
-                                            <i class="fas fa-wallet text-primary me-2"></i>
-                                            <strong>Ví điện tử</strong>
-                                            <p class="text-muted small mb-0">
-                                                Số dư: <span class="text-primary fw-bold">@Model.WalletBalance.ToString("#,0")đ</span>
-                                            </p>
+                            </div>
+                            <div class="col-4 text-center">
+                                <div class="checkout-step active">
+                                    <div class="step-number mx-auto mb-2">2</div>
+                                    <span class="step-title">Thanh toán</span>
+                                </div>
+                            </div>
+                            <div class="col-4 text-center">
+                                <div class="checkout-step">
+                                    <div class="step-number mx-auto mb-2">3</div>
+                                    <span class="step-title">Hoàn tất</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shipping Information -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0 fw-bold">
+                            <i class="fas fa-truck me-2 text-primary"></i>
+                            Thông tin giao hàng
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <form asp-action="PlaceOrder" method="post" id="orderForm">
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <label asp-for="ReceiverName" class="form-label fw-bold"></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light">
+                                            <i class="fas fa-user"></i>
+                                        </span>
+                                        <input asp-for="ReceiverName" class="form-control" />
+                                    </div>
+                                    <span asp-validation-for="ReceiverName" class="text-danger small"></span>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label asp-for="PhoneNumber" class="form-label fw-bold"></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light">
+                                            <i class="fas fa-phone"></i>
+                                        </span>
+                                        <input asp-for="PhoneNumber" class="form-control" />
+                                    </div>
+                                    <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                                </div>
+
+                                <div class="col-12">
+                                    <label asp-for="ShippingAddress" class="form-label fw-bold"></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                        </span>
+                                        <textarea asp-for="ShippingAddress" class="form-control"
+                                                  rows="2"></textarea>
+                                    </div>
+                                    <span asp-validation-for="ShippingAddress" class="text-danger small"></span>
+                                </div>
+
+                                <div class="col-12">
+                                    <label asp-for="Notes" class="form-label fw-bold"></label>
+                                    <textarea asp-for="Notes" class="form-control" rows="2"
+                                              placeholder="Ghi chú về đơn hàng (không bắt buộc)..."></textarea>
+                                    <span asp-validation-for="Notes" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Payment Method -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0 fw-bold">
+                            <i class="fas fa-credit-card me-2 text-primary"></i>
+                            Phương thức thanh toán
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="payment-method-card border rounded-3 p-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="PaymentMethod"
+                                               id="paymentCash" value="0" checked>
+                                        <label class="form-check-label w-100" for="paymentCash">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-money-bill-wave text-success fa-2x me-3"></i>
+                                                <div>
+                                                    <strong class="d-block">Tiền mặt</strong>
+                                                    <small class="text-muted">Thanh toán khi nhận hàng</small>
+                                                </div>
+                                            </div>
                                         </label>
                                     </div>
                                 </div>
                             </div>
-                            <span asp-validation-for="PaymentMethod" class="text-danger"></span>
+
+                            <div class="col-md-6">
+                                <div class="payment-method-card border rounded-3 p-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="PaymentMethod"
+                                               id="paymentWallet" value="1">
+                                        <label class="form-check-label w-100" for="paymentWallet">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-wallet text-primary fa-2x me-3"></i>
+                                                <div>
+                                                    <strong class="d-block">Ví điện tử</strong>
+                                                    <small class="text-muted">
+                                                        Số dư: <span class="text-primary fw-bold">@Model.WalletBalance.ToString("#,0")đ</span>
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="alert alert-warning wallet-warning" style="display: none;">
+                        <div class="alert alert-warning wallet-warning mt-3" style="display: none;">
                             <i class="fas fa-exclamation-triangle me-2"></i>
                             Số dư trong ví không đủ để thanh toán.
-                            Vui lòng <a asp-controller="Wallet" asp-action="Deposit" class="alert-link">nạp thêm</a>
-                            hoặc chọn phương thức khác.
+                            <a asp-controller="Wallet" asp-action="Deposit" class="alert-link">Nạp thêm ngay</a>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="col-md-4">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Đơn hàng của bạn</h5>
-                </div>
-                <div class="card-body">
-                    @foreach (var item in Model.CartItems)
-                    {
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>@item.FoodItem.Name x @item.Quantity</span>
-                            <span class="fw-bold">@((item.Quantity * item.FoodItem.Price).ToString("#,0"))đ</span>
-                        </div>
-                    }
-                    <hr>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span class="h6">Tổng cộng:</span>
-                        <span class="h5 text-primary">@Model.Total.ToString("#,0")đ</span>
+            <!-- Order Summary -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm sticky-top" style="top: 20px;">
+                    <div class="card-header bg-primary text-white py-3">
+                        <h5 class="mb-0 fw-bold">
+                            <i class="fas fa-shopping-bag me-2"></i>
+                            Đơn hàng của bạn
+                        </h5>
                     </div>
+                    <div class="card-body p-4">
+                        <div class="order-items mb-3" style="max-height: 300px; overflow-y: auto;">
+                            @foreach (var item in Model.CartItems)
+                            {
+                                <div class="d-flex justify-content-between mb-2 pb-2 border-bottom">
+                                    <div>
+                                        <span class="fw-bold">@item.FoodItem.Name</span>
+                                        <br>
+                                        <small class="text-muted">x@(item.Quantity)</small>
+                                    </div>
+                                    <span class="fw-bold">
+                                        @((item.Quantity * item.FoodItem.Price).ToString("#,0"))đ
+                                    </span>
+                                </div>
+                            }
+                        </div>
 
-                    <button type="submit" form="orderForm" class="btn btn-primary w-100 mt-3">
-                        <i class="fas fa-check-circle me-2"></i>Xác nhận đặt hàng
-                    </button>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Tạm tính:</span>
+                            <span class="fw-bold">@Model.Subtotal.ToString("#,0")đ</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Phí giao hàng:</span>
+                            <span class="text-success">Miễn phí</span>
+                        </div>
+                        @if (Model.Discount > 0)
+                        {
+                            <div class="d-flex justify-content-between mb-2 text-danger">
+                                <span>Giảm giá:</span>
+                                <span>-@Model.Discount.ToString("#,0")đ</span>
+                            </div>
+                        }
+                        <hr>
+                        <div class="d-flex justify-content-between mb-4">
+                            <span class="h5 fw-bold">Tổng cộng:</span>
+                            <span class="h5 text-primary fw-bold">@Model.Total.ToString("#,0")đ</span>
+                        </div>
 
-                    <a asp-action="Index" class="btn btn-outline-secondary w-100 mt-2">
-                        <i class="fas fa-arrow-left me-2"></i>Quay lại giỏ hàng
-                    </a>
+                        <button type="submit" form="orderForm" class="btn btn-primary btn-lg w-100 mb-3">
+                            <i class="fas fa-check-circle me-2"></i>Xác nhận đặt hàng
+                        </button>
+
+                        <a asp-action="Index" class="btn btn-outline-secondary w-100">
+                            <i class="fas fa-arrow-left me-2"></i>Quay lại giỏ hàng
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Security Badge -->
+                <div class="card border-0 shadow-sm mt-4">
+                    <div class="card-body text-center">
+                        <i class="fas fa-shield-alt text-primary fa-2x mb-2"></i>
+                        <h6 class="fw-bold">Thanh toán an toàn</h6>
+                        <p class="small text-muted mb-0">
+                            Thông tin của bạn được bảo mật 100%
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+</section>
 
 @section Scripts {
     <script>
@@ -124,7 +246,6 @@
             var walletBalance = @Model.WalletBalance;
             var total = @Model.Total;
 
-            // Kiểm tra số dư khi chọn thanh toán bằng ví
             $('input[name="PaymentMethod"]').change(function() {
                 if ($(this).val() == '1' && walletBalance < total) {
                     $('.wallet-warning').show();
@@ -138,3 +259,53 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 }
+
+<style>
+    .checkout-step {
+        position: relative;
+    }
+
+        .checkout-step.active .step-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        .checkout-step.active .step-title {
+            color: #333;
+            font-weight: 600;
+        }
+
+    .step-number {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #f0f0f0;
+        border: 2px solid #ddd;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        transition: all 0.3s;
+    }
+
+    .step-title {
+        font-size: 0.9rem;
+        color: #999;
+        transition: all 0.3s;
+    }
+
+    .payment-method-card {
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+        .payment-method-card:hover {
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .payment-method-card input[type="radio"]:checked + label {
+            color: var(--primary-color);
+        }
+</style>

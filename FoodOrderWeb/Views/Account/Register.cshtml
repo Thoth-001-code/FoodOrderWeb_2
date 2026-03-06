@@ -1,85 +1,163 @@
-﻿@using FoodOrderWeb.ViewModels
-@model RegisterViewModel
+﻿@model RegisterViewModel
 
 @{
     ViewData["Title"] = "Đăng ký tài khoản";
 }
 
-<div class="container mt-5">
+<div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow">
-                <div class="card-header bg-success text-white">
+        <div class="col-md-8 col-lg-6">
+            <div class="card border-0 shadow-lg">
+                <div class="card-header bg-success text-white text-center py-4">
                     <h4 class="mb-0">
-                        <i class="fas fa-user-plus me-2"></i>@ViewData["Title"]
+                        <i class="fas fa-user-plus me-2"></i>Đăng ký tài khoản
                     </h4>
                 </div>
 
-                <div class="card-body">
+                <div class="card-body p-4">
                     <form asp-action="Register" method="post">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label asp-for="FullName" class="form-label"></label>
-                                <input asp-for="FullName" class="form-control"
-                                       placeholder="Nhập họ và tên" />
-                                <span asp-validation-for="FullName" class="text-danger"></span>
+                                <div class="form-floating">
+                                    <input asp-for="FullName" class="form-control" placeholder="Họ và tên">
+                                    <label asp-for="FullName">
+                                        <i class="fas fa-user me-2"></i>Họ và tên
+                                    </label>
+                                </div>
+                                <span asp-validation-for="FullName" class="text-danger small"></span>
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label asp-for="Email" class="form-label"></label>
-                                <input asp-for="Email" class="form-control"
-                                       placeholder="Nhập email" />
-                                <span asp-validation-for="Email" class="text-danger"></span>
+                                <div class="form-floating">
+                                    <input asp-for="Email" class="form-control" placeholder="name@example.com">
+                                    <label asp-for="Email">
+                                        <i class="fas fa-envelope me-2"></i>Email
+                                    </label>
+                                </div>
+                                <span asp-validation-for="Email" class="text-danger small"></span>
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label asp-for="Password" class="form-label"></label>
-                                <input asp-for="Password" class="form-control"
-                                       placeholder="Nhập mật khẩu" />
-                                <span asp-validation-for="Password" class="text-danger"></span>
+                                <div class="form-floating">
+                                    <input asp-for="Password" class="form-control" placeholder="Mật khẩu">
+                                    <label asp-for="Password">
+                                        <i class="fas fa-lock me-2"></i>Mật khẩu
+                                    </label>
+                                </div>
+                                <span asp-validation-for="Password" class="text-danger small"></span>
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label asp-for="ConfirmPassword" class="form-label"></label>
-                                <input asp-for="ConfirmPassword" class="form-control"
-                                       placeholder="Xác nhận mật khẩu" />
-                                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                                <div class="form-floating">
+                                    <input asp-for="ConfirmPassword" class="form-control" placeholder="Xác nhận mật khẩu">
+                                    <label asp-for="ConfirmPassword">
+                                        <i class="fas fa-lock me-2"></i>Xác nhận mật khẩu
+                                    </label>
+                                </div>
+                                <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label asp-for="PhoneNumber" class="form-label"></label>
-                                <input asp-for="PhoneNumber" class="form-control"
-                                       placeholder="Nhập số điện thoại" />
-                                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                                <div class="form-floating">
+                                    <input asp-for="PhoneNumber" class="form-control" placeholder="Số điện thoại">
+                                    <label asp-for="PhoneNumber">
+                                        <i class="fas fa-phone me-2"></i>Số điện thoại
+                                    </label>
+                                </div>
+                                <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label asp-for="Address" class="form-label"></label>
-                                <input asp-for="Address" class="form-control"
-                                       placeholder="Nhập địa chỉ" />
-                                <span asp-validation-for="Address" class="text-danger"></span>
+                                <div class="form-floating">
+                                    <input asp-for="Address" class="form-control" placeholder="Địa chỉ">
+                                    <label asp-for="Address">
+                                        <i class="fas fa-map-marker-alt me-2"></i>Địa chỉ
+                                    </label>
+                                </div>
+                                <span asp-validation-for="Address" class="text-danger small"></span>
                             </div>
                         </div>
 
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-success btn-lg">
-                                <i class="fas fa-user-plus me-2"></i>Đăng ký
-                            </button>
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="agreeTerms" required>
+                                <label class="form-check-label small" for="agreeTerms">
+                                    Tôi đồng ý với <a href="#" class="text-decoration-none">Điều khoản sử dụng</a>
+                                    và <a href="#" class="text-decoration-none">Chính sách bảo mật</a>
+                                </label>
+                            </div>
                         </div>
+
+                        <button type="submit" class="btn btn-success btn-lg w-100 mb-3">
+                            <i class="fas fa-user-plus me-2"></i>Đăng ký
+                        </button>
                     </form>
+
+                    <div class="text-center position-relative my-4">
+                        <hr>
+                        <span class="bg-white px-3 text-muted small position-relative" style="top: -12px;">
+                            Hoặc đăng ký với
+                        </span>
+                    </div>
+
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <form asp-action="ExternalLogin" method="post">
+                                <input type="hidden" name="provider" value="Google" />
+                                <button type="submit" class="btn btn-outline-danger w-100">
+                                    <i class="fab fa-google me-2"></i>Google
+                                </button>
+                            </form>
+                        </div>
+                        <div class="col-6">
+                            <form asp-action="ExternalLogin" method="post">
+                                <input type="hidden" name="provider" value="Facebook" />
+                                <button type="submit" class="btn btn-outline-primary w-100">
+                                    <i class="fab fa-facebook-f me-2"></i>Facebook
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="card-footer text-center">
+                <div class="card-footer bg-light text-center py-3">
                     <p class="mb-0">
                         Đã có tài khoản?
-                        <a asp-action="Login" class="text-decoration-none">Đăng nhập ngay</a>
+                        <a asp-action="Login" class="text-primary text-decoration-none fw-bold">
+                            Đăng nhập ngay
+                        </a>
                     </p>
+                </div>
+            </div>
+
+            <!-- Benefits -->
+            <div class="row mt-4 g-3">
+                <div class="col-4">
+                    <div class="text-center">
+                        <i class="fas fa-gift fa-2x text-primary mb-2"></i>
+                        <small class="d-block fw-bold">Ưu đãi 50%</small>
+                        <small class="text-muted">Cho đơn đầu</small>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="text-center">
+                        <i class="fas fa-truck fa-2x text-success mb-2"></i>
+                        <small class="d-block fw-bold">Freeship</small>
+                        <small class="text-muted">Đơn từ 50k</small>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="text-center">
+                        <i class="fas fa-wallet fa-2x text-info mb-2"></i>
+                        <small class="d-block fw-bold">Ví 10k</small>
+                        <small class="text-muted">Khởi tạo ví</small>
+                    </div>
                 </div>
             </div>
         </div>

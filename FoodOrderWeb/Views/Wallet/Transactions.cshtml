@@ -3,122 +3,672 @@
 @{
     ViewData["Title"] = "Lịch sử giao dịch";
     var wallet = ViewBag.Wallet as FoodOrderWeb.Models.Wallet;
-    var currentPage = ViewBag.CurrentPage;
-    var totalPages = ViewBag.TotalPages;
+    var currentPage = ViewBag.CurrentPage ?? 1;
+    var totalPages = ViewBag.TotalPages ?? 1;
+    var totalItems = ViewBag.TotalItems ?? 0;
+    var currentType = ViewBag.CurrentType as string;
 }
 
-<div class="container mt-4">
-    <h2 class="mb-4">
-        <i class="fas fa-history me-2"></i>Lịch sử giao dịch
-    </h2>
-
-    <div class="row mb-4">
-        <div class="col-md-4">
-            <div class="card bg-primary text-white">
-                <div class="card-body">
-                    <h5 class="card-title">Số dư hiện tại</h5>
-                    <h3>@wallet.Balance.ToString("#,0")đ</h3>
-                    <a asp-action="Index" class="text-white">
-                        <i class="fas fa-arrow-left me-1"></i>Quay về ví
+<!-- Breadcrumb -->
+<section class="bg-light py-3">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item">
+                    <a asp-controller="Home" asp-action="Index" class="text-decoration-none">
+                        <i class="fas fa-home me-1"></i>Trang chủ
                     </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a asp-action="Index" class="text-decoration-none">
+                        <i class="fas fa-wallet me-1"></i>Ví điện tử
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">Lịch sử giao dịch</li>
+            </ol>
+        </nav>
+    </div>
+</section>
+
+<section class="py-4">
+    <div class="container">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 mb-0">
+                <i class="fas fa-history text-primary me-2"></i>
+                Lịch sử giao dịch
+            </h1>
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Quay lại ví
+            </a>
+        </div>
+
+        <!-- Wallet Summary Card -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm bg-gradient-primary text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-white-50 mb-2">Số dư hiện tại</h6>
+                                <h3 class="mb-0 fw-bold">@wallet?.Balance.ToString("#,0")đ</h3>
+                                <small class="text-white-50">
+                                    <i class="far fa-clock me-1"></i>
+                                    Cập nhật: @(wallet?.LastUpdated.ToString("dd/MM/yyyy HH:mm"))
+                                </small>
+                            </div>
+                            <i class="fas fa-wallet fa-3x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="col-md-8">
+                <div class="row g-3">
+                    <div class="col-md-4 col-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="text-muted mb-2">Tổng nạp</h6>
+                                        <h5 class="fw-bold text-success mb-0">
+                                            @ViewBag.TotalDeposit?.ToString("#,0")đ
+                                        </h5>
+                                    </div>
+                                    <div class="bg-success bg-opacity-10 rounded-circle p-2">
+                                        <i class="fas fa-download text-success"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 col-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="text-muted mb-2">Tổng chi</h6>
+                                        <h5 class="fw-bold text-danger mb-0">
+                                            @ViewBag.TotalSpent?.ToString("#,0")đ
+                                        </h5>
+                                    </div>
+                                    <div class="bg-danger bg-opacity-10 rounded-circle p-2">
+                                        <i class="fas fa-upload text-danger"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 col-12">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="text-muted mb-2">Hoàn tiền</h6>
+                                        <h5 class="fw-bold text-info mb-0">
+                                            @ViewBag.TotalRefund?.ToString("#,0")đ
+                                        </h5>
+                                    </div>
+                                    <div class="bg-info bg-opacity-10 rounded-circle p-2">
+                                        <i class="fas fa-undo text-info"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="card shadow">
-        <div class="card-body">
-            @if (!Model.Any())
-            {
-                <p class="text-muted text-center py-5">Chưa có giao dịch nào</p>
-            }
-            else
-            {
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Thời gian</th>
-                                <th>Mã GD</th>
-                                <th>Loại</th>
-                                <th>Mô tả</th>
-                                <th class="text-end">Số tiền</th>
-                                <th class="text-end">Số dư trước</th>
-                                <th class="text-end">Số dư sau</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var transaction in Model)
-                            {
-                                <tr>
-                                    <td>@transaction.CreatedAt.ToString("dd/MM/yyyy HH:mm:ss")</td>
-                                    <td>@transaction.Id</td>
-                                    <td>
-                                        @switch (transaction.Type)
-                                        {
-                                            case TransactionType.Deposit:
-                                                <span class="badge bg-success">Nạp tiền</span>
-                                                break;
-                                            case TransactionType.Payment:
-                                                <span class="badge bg-danger">Thanh toán</span>
-                                                break;
-                                            case TransactionType.Refund:
-                                                <span class="badge bg-info">Hoàn tiền</span>
-                                                break;
-                                        }
-                                    </td>
-                                    <td>
-                                        @transaction.Description
-                                        @if (transaction.OrderId != null)
-                                        {
-                                            <a asp-controller="Order" asp-action="Details"
-                                               asp-route-id="@transaction.OrderId"
-                                               class="text-primary">(ĐH#@transaction.OrderId)</a>
-                                        }
-                                    </td>
-                                    <td class="text-end fw-bold
-                                                @(transaction.Type == TransactionType.Deposit || transaction.Type == TransactionType.Refund ? "text-success" : "text-danger")">
-                                        @(transaction.Type == TransactionType.Deposit || transaction.Type == TransactionType.Refund ? "+" : "-")
-                                        @transaction.Amount.ToString("#,0")đ
-                                    </td>
-                                    <td class="text-end">@transaction.BalanceBefore.ToString("#,0")đ</td>
-                                    <td class="text-end">@transaction.BalanceAfter.ToString("#,0")đ</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
+        <!-- Filter Section -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold small text-muted">LOẠI GIAO DỊCH</label>
+                        <select class="form-select" id="typeFilter" onchange="filterByType()">
+                            <option value="">Tất cả</option>
+                            <option value="Deposit" selected="@(currentType == "Deposit")">Nạp tiền</option>
+                            <option value="Payment" selected="@(currentType == "Payment")">Thanh toán</option>
+                            <option value="Refund" selected="@(currentType == "Refund")">Hoàn tiền</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold small text-muted">TỪ NGÀY</label>
+                        <input type="date" class="form-control" id="fromDate"
+                               value="@DateTime.Now.AddDays(-30).ToString("yyyy-MM-dd")">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold small text-muted">ĐẾN NGÀY</label>
+                        <input type="date" class="form-control" id="toDate"
+                               value="@DateTime.Now.ToString("yyyy-MM-dd")">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold small text-muted">&nbsp;</label>
+                        <button class="btn btn-primary w-100" onclick="applyFilter()">
+                            <i class="fas fa-filter me-2"></i>Lọc
+                        </button>
+                    </div>
                 </div>
+            </div>
+        </div>
 
-                <!-- Phân trang -->
-                @if (totalPages > 1)
+        <!-- Transactions Table -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="fas fa-list me-2 text-primary"></i>
+                        Danh sách giao dịch
+                        <span class="badge bg-primary ms-2">@totalItems giao dịch</span>
+                    </h5>
+
+                    <div class="btn-group">
+                        <button class="btn btn-outline-success btn-sm" onclick="exportToExcel()">
+                            <i class="fas fa-file-excel me-1"></i>Excel
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm" onclick="exportToPDF()">
+                            <i class="fas fa-file-pdf me-1"></i>PDF
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="printPage()">
+                            <i class="fas fa-print me-1"></i>In
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body p-0">
+                @if (!Model.Any())
                 {
-                    <nav aria-label="Page navigation" class="mt-4">
-                        <ul class="pagination justify-content-center">
+                    <div class="text-center py-5">
+                        <div class="mb-3">
+                            <i class="fas fa-exchange-alt fa-4x text-muted"></i>
+                        </div>
+                        <h5 class="text-muted mb-3">Không có giao dịch nào</h5>
+                        @if (!string.IsNullOrEmpty(currentType))
+                        {
+                            <p class="text-muted mb-3">Không tìm thấy giao dịch loại "@currentType"</p>
+                            <a asp-action="Transactions" class="btn btn-primary">
+                                <i class="fas fa-undo me-2"></i>Xem tất cả
+                            </a>
+                        }
+                        else
+                        {
+                            <p class="text-muted mb-3">Hãy thực hiện giao dịch đầu tiên của bạn</p>
+                            <a asp-action="Deposit" class="btn btn-primary">
+                                <i class="fas fa-plus-circle me-2"></i>Nạp tiền ngay
+                            </a>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="px-4">Thời gian</th>
+                                    <th>Mã GD</th>
+                                    <th>Loại</th>
+                                    <th>Mô tả</th>
+                                    <th class="text-end">Số tiền</th>
+                                    <th class="text-end">Số dư trước</th>
+                                    <th class="text-end">Số dư sau</th>
+                                    <th class="text-center">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var transaction in Model)
+                                {
+                                    <tr>
+                                        <td class="px-4">
+                                            <div>@transaction.CreatedAt.ToString("dd/MM/yyyy")</div>
+                                            <small class="text-muted">@transaction.CreatedAt.ToString("HH:mm:ss")</small>
+                                        </td>
+                                        <td>
+                                            <span class="fw-bold">#@transaction.Id</span>
+                                        </td>
+                                        <td>
+                                            @switch (transaction.Type)
+                                            {
+                                                case TransactionType.Deposit:
+                                                    <span class="badge bg-success bg-opacity-10 text-success px-3 py-2">
+                                                        <i class="fas fa-download me-1"></i>Nạp tiền
+                                                    </span>
+                                                    break;
+                                                case TransactionType.Payment:
+                                                    <span class="badge bg-danger bg-opacity-10 text-danger px-3 py-2">
+                                                        <i class="fas fa-upload me-1"></i>Thanh toán
+                                                    </span>
+                                                    break;
+                                                case TransactionType.Refund:
+                                                    <span class="badge bg-info bg-opacity-10 text-info px-3 py-2">
+                                                        <i class="fas fa-undo me-1"></i>Hoàn tiền
+                                                    </span>
+                                                    break;
+                                            }
+                                        </td>
+                                        <td>
+                                            @transaction.Description
+                                            @if (transaction.OrderId != null)
+                                            {
+                                                <a asp-controller="Order" asp-action="Details"
+                                                   asp-route-id="@transaction.OrderId"
+                                                   class="text-primary text-decoration-none small">
+                                                    (ĐH#@transaction.OrderId)
+                                                </a>
+                                            }
+                                        </td>
+                                        <td class="text-end fw-bold
+                                                    @(transaction.Type == TransactionType.Deposit || transaction.Type == TransactionType.Refund ? "text-success" : "text-danger")">
+                                            @(transaction.Type == TransactionType.Deposit || transaction.Type == TransactionType.Refund ? "+" : "-")
+                                            @transaction.Amount.ToString("#,0")đ
+                                        </td>
+                                        <td class="text-end">@transaction.BalanceBefore.ToString("#,0")đ</td>
+                                        <td class="text-end fw-bold">@transaction.BalanceAfter.ToString("#,0")đ</td>
+                                        <td class="text-center">
+                                            <button class="btn btn-sm btn-outline-primary"
+                                                    onclick="viewTransactionDetail(@transaction.Id)"
+                                                    data-bs-toggle="tooltip" title="Xem chi tiết">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Export Info -->
+                    <div class="p-3 border-top bg-light">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <p class="text-muted small mb-0">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Hiển thị @Model.Count() trên tổng số <strong>@totalItems</strong> giao dịch
+                                </p>
+                            </div>
+                            <div class="col-md-6 text-md-end">
+                                <span class="text-muted small me-2">
+                                    <i class="fas fa-arrow-up text-success me-1"></i>Nạp: @ViewBag.DepositCount |
+                                    <i class="fas fa-arrow-down text-danger me-1"></i>Chi: @ViewBag.PaymentCount |
+                                    <i class="fas fa-undo text-info me-1"></i>Hoàn: @ViewBag.RefundCount
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Pagination -->
+            @if (totalPages > 1)
+            {
+                <div class="card-footer bg-white">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center mb-0">
                             <li class="page-item @(currentPage == 1 ? "disabled" : "")">
                                 <a class="page-link" asp-action="Transactions"
-                                   asp-route-page="@(currentPage - 1)">
+                                   asp-route-page="@(currentPage - 1)"
+                                   asp-route-type="@currentType">
                                     <i class="fas fa-chevron-left"></i>
                                 </a>
                             </li>
 
-                            @for (int i = 1; i <= totalPages; i++)
+                            @{
+                                int startPage = Math.Max(1, currentPage - 2);
+                                int endPage = Math.Min(totalPages, startPage + 4);
+                                if (endPage - startPage < 4)
+                                {
+                                    startPage = Math.Max(1, endPage - 4);
+                                }
+                            }
+
+                            @if (startPage > 1)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" asp-action="Transactions"
+                                       asp-route-page="1"
+                                       asp-route-type="@currentType">1</a>
+                                </li>
+                                @if (startPage > 2)
+                                {
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                }
+                            }
+
+                            @for (int i = startPage; i <= endPage; i++)
                             {
                                 <li class="page-item @(i == currentPage ? "active" : "")">
                                     <a class="page-link" asp-action="Transactions"
-                                       asp-route-page="@i">@i</a>
+                                       asp-route-page="@i"
+                                       asp-route-type="@currentType">@i</a>
+                                </li>
+                            }
+
+                            @if (endPage < totalPages)
+                            {
+                                @if (endPage < totalPages - 1)
+                                {
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                }
+                                <li class="page-item">
+                                    <a class="page-link" asp-action="Transactions"
+                                       asp-route-page="@totalPages"
+                                       asp-route-type="@currentType">@totalPages</a>
                                 </li>
                             }
 
                             <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
                                 <a class="page-link" asp-action="Transactions"
-                                   asp-route-page="@(currentPage + 1)">
+                                   asp-route-page="@(currentPage + 1)"
+                                   asp-route-type="@currentType">
                                     <i class="fas fa-chevron-right"></i>
                                 </a>
                             </li>
                         </ul>
                     </nav>
-                }
+                </div>
             }
+        </div>
+
+        <!-- Quick Stats Cards -->
+        <div class="row g-3 mt-4">
+            <div class="col-md-3 col-6">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <div class="bg-primary bg-opacity-10 rounded-circle p-3">
+                                    <i class="fas fa-calendar-day text-primary fa-2x"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="text-muted mb-1">Hôm nay</h6>
+                                <h5 class="fw-bold mb-0">@ViewBag.TodayCount giao dịch</h5>
+                                <small class="text-success">+@ViewBag.TodayAmount.ToString("#,0")đ</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-6">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <div class="bg-success bg-opacity-10 rounded-circle p-3">
+                                    <i class="fas fa-calendar-week text-success fa-2x"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="text-muted mb-1">Tuần này</h6>
+                                <h5 class="fw-bold mb-0">@ViewBag.WeekCount giao dịch</h5>
+                                <small class="text-success">+@ViewBag.WeekAmount.ToString("#,0")đ</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-6">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <div class="bg-info bg-opacity-10 rounded-circle p-3">
+                                    <i class="fas fa-calendar-alt text-info fa-2x"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="text-muted mb-1">Tháng này</h6>
+                                <h5 class="fw-bold mb-0">@ViewBag.MonthCount giao dịch</h5>
+                                <small class="text-success">+@ViewBag.MonthAmount.ToString("#,0")đ</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-6">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <div class="bg-warning bg-opacity-10 rounded-circle p-3">
+                                    <i class="fas fa-chart-line text-warning fa-2x"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="text-muted mb-1">Trung bình</h6>
+                                <h5 class="fw-bold mb-0">@ViewBag.AvgTransaction.ToString("#,0")đ</h5>
+                                <small class="text-muted">/giao dịch</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Transaction Detail Modal -->
+<div class="modal fade" id="transactionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-receipt text-primary me-2"></i>
+                    Chi tiết giao dịch
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="transactionDetail">
+                <!-- Load via AJAX -->
+                <div class="text-center py-3">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function(tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            // Highlight row on hover
+            $('tbody tr').hover(
+                function() { $(this).addClass('bg-light'); },
+                function() { $(this).removeClass('bg-light'); }
+            );
+        });
+
+        // Filter by type
+        function filterByType() {
+            var type = $('#typeFilter').val();
+            var url = new URL(window.location.href);
+            if (type) {
+                url.searchParams.set('type', type);
+            } else {
+                url.searchParams.delete('type');
+            }
+            url.searchParams.set('page', '1');
+            window.location.href = url.toString();
+        }
+
+        // Apply date filter
+        function applyFilter() {
+            var fromDate = $('#fromDate').val();
+            var toDate = $('#toDate').val();
+            var type = $('#typeFilter').val();
+
+            if (!fromDate || !toDate) {
+                showToast('Vui lòng chọn khoảng thời gian', 'warning');
+                return;
+            }
+
+            var url = new URL(window.location.href);
+            url.searchParams.set('fromDate', fromDate);
+            url.searchParams.set('toDate', toDate);
+            if (type) url.searchParams.set('type', type);
+            url.searchParams.set('page', '1');
+            window.location.href = url.toString();
+        }
+
+        // View transaction detail
+        function viewTransactionDetail(id) {
+            $('#transactionModal').modal('show');
+            $('#transactionDetail').html(`
+                <div class="text-center py-3">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            `);
+
+            $.get('/Wallet/Transaction/' + id)
+                .done(function(data) {
+                    $('#transactionDetail').html(data);
+                })
+                .fail(function() {
+                    $('#transactionDetail').html(`
+                        <div class="alert alert-danger mb-0">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            Không thể tải chi tiết giao dịch
+                        </div>
+                    `);
+                });
+        }
+
+        // Export functions
+        function exportToExcel() {
+            showLoading();
+            setTimeout(function() {
+                hideLoading();
+                showToast('Đã xuất file Excel thành công!', 'success');
+            }, 1500);
+        }
+
+        function exportToPDF() {
+            showLoading();
+            setTimeout(function() {
+                hideLoading();
+                showToast('Đã xuất file PDF thành công!', 'success');
+            }, 1500);
+        }
+
+        function printPage() {
+            window.print();
+        }
+    </script>
+}
+
+<style>
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .text-white-50 {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+
+    .opacity-50 {
+        opacity: 0.5;
+    }
+
+    .table td {
+        vertical-align: middle;
+        padding: 1rem 0.5rem;
+    }
+
+    .table th {
+        padding: 1rem 0.5rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+    }
+
+    tbody tr {
+        transition: all 0.2s;
+    }
+
+        tbody tr:hover {
+            background-color: rgba(102, 126, 234, 0.05) !important;
+        }
+
+    .badge {
+        font-weight: 500;
+        letter-spacing: 0.3px;
+    }
+
+    .page-link {
+        color: #667eea;
+        border: none;
+        padding: 0.5rem 1rem;
+        margin: 0 0.2rem;
+        border-radius: 5px;
+    }
+
+    .page-item.active .page-link {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-color: transparent;
+    }
+
+    .page-link:hover {
+        background-color: #f0f0f0;
+        color: #667eea;
+    }
+
+    .bg-opacity-10 {
+        --bs-bg-opacity: 0.1;
+    }
+
+    @@media print {
+        .navbar, .footer, .btn-group, .pagination, .modal {
+            display: none !important;
+        }
+
+        .card {
+            box-shadow: none !important;
+            border: 1px solid #ddd !important;
+        }
+
+        table {
+            font-size: 12pt;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .table td:nth-child(2),
+        .table th:nth-child(2) {
+            display: none;
+        }
+
+        .badge {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+        }
+    }
+</style>

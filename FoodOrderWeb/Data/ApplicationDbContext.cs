@@ -175,5 +175,10 @@ namespace FoodOrderWeb.Data
                 .HasIndex(t => t.CreatedAt)
                 .HasDatabaseName("IX_Transactions_CreatedAt");
         }
+
+        internal object Entry(object cartItem)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
