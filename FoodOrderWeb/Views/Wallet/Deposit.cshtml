@@ -1,0 +1,89 @@
+﻿@model FoodOrderWeb.ViewModels.DepositViewModel
+
+@{
+    ViewData["Title"] = "Nạp tiền vào ví";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-plus-circle me-2"></i>@ViewData["Title"]
+                    </h4>
+                </div>
+
+                <div class="card-body">
+                    <form asp-action="Deposit" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="mb-4">
+                            <label asp-for="Amount" class="form-label fw-bold"></label>
+                            <div class="input-group input-group-lg">
+                                <input asp-for="Amount" class="form-control"
+                                       type="number" min="10000" step="10000"
+                                       placeholder="Nhập số tiền" />
+                                <span class="input-group-text">đ</span>
+                            </div>
+                            <span asp-validation-for="Amount" class="text-danger"></span>
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Số tiền nạp từ 10,000đ đến 10,000,000đ
+                            </small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Nạp nhanh</label>
+                            <div class="d-flex flex-wrap gap-2">
+                                @foreach (var amount in Model.QuickAmounts)
+                                {
+                                    <button type="button" class="btn btn-outline-primary quick-amount"
+                                            data-amount="@amount">
+                                        @amount.ToString("#,0")đ
+                                    </button>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Description" class="form-label fw-bold"></label>
+                            <textarea asp-for="Description" class="form-control" rows="2"
+                                      placeholder="Ghi chú (không bắt buộc)"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-shield-alt me-2"></i>
+                            Đây là chức năng nạp tiền giả lập. Số tiền sẽ được cộng ngay vào ví.
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-check-circle me-2"></i>Xác nhận nạp tiền
+                            </button>
+                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Quay lại
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Xử lý nạp nhanh
+            $('.quick-amount').click(function() {
+                var amount = $(this).data('amount');
+                $('#Amount').val(amount);
+            });
+        });
+    </script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

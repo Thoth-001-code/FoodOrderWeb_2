@@ -1,0 +1,125 @@
+﻿@model FoodOrderWeb.Models.Wallet
+
+@{
+    ViewData["Title"] = "Ví điện tử";
+    var transactions = ViewBag.Transactions as List<FoodOrderWeb.Models.Transaction>;
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">
+        <i class="fas fa-wallet me-2"></i>Ví điện tử của tôi
+    </h2>
+    
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card bg-primary text-white shadow">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-credit-card me-2"></i>Số dư hiện tại
+                    </h5>
+                    <h2 class="display-4 mb-3">@Model.Balance.ToString("#,0")đ</h2>
+                    
+                    <p class="mb-1">
+                        <small>
+                            <i class="fas fa-circle me-1" 
+                               style="color: @(Model.Status == WalletStatus.Active ? "#28a745" : "#dc3545")"></i>
+                            Trạng thái: @(Model.Status == WalletStatus.Active ? "Đang hoạt động" : "Đã khóa")
+                        </small>
+                    </p>
+                    <p class="mb-0">
+                        <small>
+                            <i class="far fa-clock me-1"></i>
+                            Cập nhật: @Model.LastUpdated.ToString("dd/MM/yyyy HH:mm")
+                        </small>
+                    </p>
+                    
+                    <div class="mt-4">
+                        <a asp-action="Deposit" class="btn btn-light w-100">
+                            <i class="fas fa-plus-circle me-2"></i>Nạp tiền
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history me-2"></i>Lịch sử giao dịch gần đây
+                    </h5>
+                    <a asp-action="Transactions" class="btn btn-light btn-sm">
+                        Xem tất cả <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+                <div class="card-body">
+                    @if (transactions == null || !transactions.Any())
+                    {
+                        <p class="text-muted text-center py-3">Chưa có giao dịch nào</p>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Thời gian</th>
+                                        <th>Loại</th>
+                                        <th>Mô tả</th>
+                                        <th class="text-end">Số tiền</th>
+                                        <th class="text-end">Số dư</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var transaction in transactions)
+                                    {
+                                        <tr>
+                                            <td>@transaction.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                            <td>
+                                                @switch (transaction.Type)
+                                                {
+                                                    case TransactionType.Deposit:
+                                                        <span class="badge bg-success">Nạp tiền</span>
+                                                        break;
+                                                    case TransactionType.Payment:
+                                                        <span class="badge bg-danger">Thanh toán</span>
+                                                        break;
+                                                    case TransactionType.Refund:
+                                                        <span class="badge bg-info">Hoàn tiền</span>
+                                                        break;
+                                                }
+                                            </td>
+                                            <td>
+                                                @transaction.Description
+                                                @if (transaction.OrderId != null)
+                                                {
+                                                    <a asp-controller="Order" asp-action="Details" 
+                                                       asp-route-id="@transaction.OrderId" 
+                                                       class="text-primary">(ĐH#@transaction.OrderId)</a>
+                                                }
+                                            </td>
+                                            <td class="text-end fw-bold 
+                                                @(transaction.Type == TransactionType.Deposit || transaction.Type == TransactionType.Refund ? "text-success" : "text-danger")">
+                                                @(transaction.Type == TransactionType.Deposit || transaction.Type == TransactionType.Refund ? "+" : "-")
+                                                @transaction.Amount.ToString("#,0")đ
+                                            </td>
+                                            <td class="text-end">@transaction.BalanceAfter.ToString("#,0")đ</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

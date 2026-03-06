@@ -1,0 +1,133 @@
+﻿@model List<FoodOrderWeb.Models.CartItem>
+
+@{
+    ViewData["Title"] = "Giỏ hàng";
+    var total = ViewBag.Total ?? 0;
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">
+        <i class="fas fa-shopping-cart me-2"></i>Giỏ hàng của bạn
+    </h2>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5">
+            <i class="fas fa-shopping-cart fa-4x text-muted mb-3"></i>
+            <h4 class="text-muted">Giỏ hàng trống</h4>
+            <p class="mb-3">Hãy thêm món ăn vào giỏ hàng để đặt hàng</p>
+            <a asp-controller="Menu" asp-action="Index" class="btn btn-primary">
+                <i class="fas fa-utensils me-2"></i>Xem thực đơn
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card shadow">
+                    <div class="card-body">
+                        @foreach (var item in Model)
+                        {
+                            <div class="row align-items-center mb-3 pb-3 border-bottom">
+                                <div class="col-md-2 col-4">
+                                    <img src="@(item.FoodItem.ImageUrl ?? "https://via.placeholder.com/100x80")"
+                                         class="img-fluid rounded" alt="@item.FoodItem.Name">
+                                </div>
+                                <div class="col-md-4 col-8">
+                                    <h5 class="mb-1">@item.FoodItem.Name</h5>
+                                    <p class="text-muted mb-0">@item.FoodItem.Price.ToString("#,0")đ</p>
+                                </div>
+                                <div class="col-md-3 col-5 mt-2 mt-md-0">
+                                    <div class="input-group">
+                                        <button class="btn btn-outline-secondary"
+                                                onclick="updateQuantity(@item.Id, @item.Quantity - 1)">
+                                            -
+                                        </button>
+                                        <input type="number" class="form-control text-center"
+                                               value="@item.Quantity" min="1" max="10"
+                                               id="quantity_@item.Id" readonly>
+                                        <button class="btn btn-outline-secondary"
+                                                onclick="updateQuantity(@item.Id, @item.Quantity + 1)">
+                                            +
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 col-4 mt-2 mt-md-0 text-center">
+                                    <span class="fw-bold" id="total_@item.Id">
+                                        @((item.Quantity * item.FoodItem.Price).ToString("#,0"))đ
+                                    </span>
+                                </div>
+                                <div class="col-md-1 col-3 mt-2 mt-md-0 text-end">
+                                    <button class="btn btn-link text-danger" onclick="removeItem(@item.Id)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Tổng cộng</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-3">
+                            <span>Tạm tính:</span>
+                            <span class="fw-bold" id="cart-total">@total.ToString("#,0")đ</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="h5">Tổng cộng:</span>
+                            <span class="h5 text-primary" id="cart-total-final">@total.ToString("#,0")đ</span>
+                        </div>
+
+                        <a asp-action="Checkout" class="btn btn-primary w-100">
+                            <i class="fas fa-credit-card me-2"></i>Tiến hành đặt hàng
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function updateQuantity(itemId, newQuantity) {
+            if (newQuantity < 1 || newQuantity > 10) return;
+
+            $.post('/Cart/UpdateQuantity', { cartItemId: itemId, quantity: newQuantity })
+                .done(function(response) {
+                    if (response.success) {
+                        // Cập nhật số lượng hiển thị
+                        $('#quantity_' + itemId).val(newQuantity);
+
+                        // Cập nhật tổng tiền của item
+                        $('#total_' + itemId).text(response.itemTotal + 'đ');
+
+                        // Cập nhật tổng tiền giỏ hàng
+                        $('#cart-total').text(response.cartTotal + 'đ');
+                        $('#cart-total-final').text(response.cartTotal + 'đ');
+
+                        // Cập nhật số lượng trên icon giỏ hàng
+                        updateCartCount();
+                    }
+                });
+        }
+
+        function removeItem(itemId) {
+            if (confirm('Bạn có chắc muốn xóa món này khỏi giỏ hàng?')) {
+                $.post('/Cart/RemoveItem', { cartItemId: itemId })
+                    .done(function(response) {
+                        if (response.success) {
+                            location.reload();
+                        }
+                    });
+            }
+        }
+    </script>
+}

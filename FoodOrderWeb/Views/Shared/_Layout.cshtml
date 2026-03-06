@@ -1,0 +1,694 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - FoodOrder</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- Font Awesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <!-- Google Fonts - Poppins font đẹp -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+    <!-- Animate.css cho hiệu ứng -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+    <style>
+        :root {
+            --primary-color: #ff6b6b;
+            --secondary-color: #4ecdc4;
+            --accent-color: #ffe66d;
+            --dark-color: #2c3e50;
+            --light-color: #f7f9fc;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        main {
+            flex: 1;
+        }
+
+        /* Navbar styling */
+        .navbar {
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            padding: 1rem 0;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            background: linear-gradient(45deg, #fff, #ffe6e6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-link {
+            font-weight: 500;
+            position: relative;
+            padding: 0.5rem 1rem !important;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #fff, #ffe6e6);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 80%;
+        }
+
+        /* Cart badge animation */
+        .cart-badge {
+            animation: pulse 1.5s infinite;
+        }
+
+        @@keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* Dropdown menu styling */
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border-radius: 10px;
+            padding: 0.5rem 0;
+            animation: slideDown 0.3s ease;
+        }
+
+        @@keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dropdown-item {
+            padding: 0.7rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .dropdown-item:hover {
+            background: linear-gradient(90deg, #f8f9fa, #e9ecef);
+            padding-left: 2rem;
+        }
+
+        .dropdown-item i {
+            width: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        /* Footer styling */
+        .footer {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            margin-top: auto;
+        }
+
+        .footer a {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer a:hover {
+            color: white;
+            text-decoration: underline;
+        }
+
+        /* Alert animation */
+        .alert {
+            animation: slideInDown 0.5s ease;
+        }
+
+        @@keyframes slideInDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            backdrop-filter: blur(5px);
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @@keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Toast notification */
+        .toast-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        .toast-custom {
+            background: white;
+            border-radius: 10px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transform: translateX(120%);
+            animation: slideInRight 0.3s forwards;
+        }
+
+        @@keyframes slideInRight {
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        .toast-success {
+            border-left: 4px solid #28a745;
+        }
+
+        .toast-error {
+            border-left: 4px solid #dc3545;
+        }
+
+        .toast-warning {
+            border-left: 4px solid #ffc107;
+        }
+
+        .toast-info {
+            border-left: 4px solid #17a2b8;
+        }
+
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+
+            .dropdown-menu {
+                animation: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Header -->
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <!-- Logo/Brand -->
+                <a class="navbar-brand" asp-controller="Home" asp-action="Index">
+                    <i class="fas fa-utensils me-2"></i>
+                    <span class="fw-bold">FoodOrder</span>
+                </a>
+
+                <!-- Mobile Toggle Button -->
+                <button class="navbar-toggler" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#navbarMain"
+                        aria-controls="navbarMain" aria-expanded="false"
+                        aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Navbar Links -->
+                <div class="collapse navbar-collapse" id="navbarMain">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")"
+                               asp-controller="Home" asp-action="Index">
+                                <i class="fas fa-home me-1"></i>Trang chủ
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Menu" ? "active" : "")"
+                               asp-controller="Menu" asp-action="Index">
+                                <i class="fas fa-list me-1"></i>Thực đơn
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "About" ? "active" : "")"
+                               asp-controller="Home" asp-action="About">
+                                <i class="fas fa-info-circle me-1"></i>Giới thiệu
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "Contact" ? "active" : "")"
+                               asp-controller="Home" asp-action="Contact">
+                                <i class="fas fa-envelope me-1"></i>Liên hệ
+                            </a>
+                        </li>
+                    </ul>
+
+                    <!-- Right Side Navbar -->
+                    <ul class="navbar-nav ms-auto align-items-center">
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <!-- Cart Icon for User -->
+                            @if (!User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item me-2">
+                                    <a class="nav-link position-relative" asp-controller="Cart" asp-action="Index"
+                                       data-bs-toggle="tooltip" title="Giỏ hàng">
+                                        <i class="fas fa-shopping-cart fa-lg"></i>
+                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-badge"
+                                              id="cartCount" style="display: none;">
+                                            0
+                                        </span>
+                                    </a>
+                                </li>
+                            }
+
+                            <!-- User Dropdown Menu -->
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#"
+                                   id="userDropdown" role="button" data-bs-toggle="dropdown"
+                                   aria-expanded="false">
+                                    <i class="fas fa-user-circle fa-lg me-1"></i>
+                                    <span class="d-none d-lg-inline">
+                                        @{
+                                            var displayName = User.Identity.Name?.Split('@')[0] ?? "User";
+                                            if (displayName.Length > 15)
+                                            {
+                                                displayName = displayName.Substring(0, 12) + "...";
+                                            }
+                                        }
+                                        @displayName
+                                    </span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <li>
+                                            <a class="dropdown-item" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                                                <i class="fas fa-tachometer-alt"></i>Dashboard Admin
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-area="Admin" asp-controller="Categories" asp-action="Index">
+                                                <i class="fas fa-tags"></i>Quản lý danh mục
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-area="Admin" asp-controller="FoodItems" asp-action="Index">
+                                                <i class="fas fa-pizza-slice"></i>Quản lý món ăn
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-area="Admin" asp-controller="Orders" asp-action="Index">
+                                                <i class="fas fa-truck"></i>Quản lý đơn hàng
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                    }
+                                    else
+                                    {
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Order" asp-action="MyOrders">
+                                                <i class="fas fa-clipboard-list"></i>Đơn hàng của tôi
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Wallet" asp-action="Index">
+                                                <i class="fas fa-wallet"></i>Ví điện tử
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                    }
+
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Account" asp-action="Profile">
+                                            <i class="fas fa-id-card"></i>Thông tin cá nhân
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Account" asp-action="ChangePassword">
+                                            <i class="fas fa-key"></i>Đổi mật khẩu
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form asp-controller="Account" asp-action="Logout" method="post" id="logoutForm">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="dropdown-item text-danger">
+                                                <i class="fas fa-sign-out-alt"></i>Đăng xuất
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Account" asp-action="Login">
+                                    <i class="fas fa-sign-in-alt me-1"></i>Đăng nhập
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Account" asp-action="Register">
+                                    <i class="fas fa-user-plus me-1"></i>Đăng ký
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Alert Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="container mt-3">
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                @TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="container mt-3">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                @TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    }
+
+    @if (TempData["WarningMessage"] != null)
+    {
+        <div class="container mt-3">
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                @TempData["WarningMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    }
+
+    @if (TempData["InfoMessage"] != null)
+    {
+        <div class="container mt-3">
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                <i class="fas fa-info-circle me-2"></i>
+                @TempData["InfoMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    }
+
+    <!-- Main Content -->
+    <main class="py-4">
+        @RenderBody()
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto py-4">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <h5 class="mb-3">
+                        <i class="fas fa-utensils me-2"></i>FoodOrder
+                    </h5>
+                    <p class="text-white-50">
+                        Ứng dụng đặt đồ ăn trực tuyến nhanh chóng, tiện lợi.
+                        Với ví điện tử tích hợp, thanh toán chưa bao giờ dễ dàng hơn.
+                    </p>
+                    <div class="social-links">
+                        <a href="#" class="text-white me-3" target="_blank">
+                            <i class="fab fa-facebook fa-lg"></i>
+                        </a>
+                        <a href="#" class="text-white me-3" target="_blank">
+                            <i class="fab fa-instagram fa-lg"></i>
+                        </a>
+                        <a href="#" class="text-white me-3" target="_blank">
+                            <i class="fab fa-twitter fa-lg"></i>
+                        </a>
+                        <a href="#" class="text-white" target="_blank">
+                            <i class="fab fa-youtube fa-lg"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <h5 class="mb-3">Liên kết</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a asp-controller="Home" asp-action="About" class="text-white-50 text-decoration-none">
+                                <i class="fas fa-chevron-right me-1 small"></i>Giới thiệu
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a asp-controller="Home" asp-action="Contact" class="text-white-50 text-decoration-none">
+                                <i class="fas fa-chevron-right me-1 small"></i>Liên hệ
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a asp-controller="Menu" asp-action="Index" class="text-white-50 text-decoration-none">
+                                <i class="fas fa-chevron-right me-1 small"></i>Thực đơn
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="col-md-3">
+                    <h5 class="mb-3">Hỗ trợ</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="#" class="text-white-50 text-decoration-none">
+                                <i class="fas fa-chevron-right me-1 small"></i>FAQ
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="text-white-50 text-decoration-none">
+                                <i class="fas fa-chevron-right me-1 small"></i>Chính sách bảo mật
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="text-white-50 text-decoration-none">
+                                <i class="fas fa-chevron-right me-1 small"></i>Điều khoản sử dụng
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="col-md-3">
+                    <h5 class="mb-3">Liên hệ</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2 text-white-50">
+                            <i class="fas fa-map-marker-alt me-2"></i>123 Đường ABC, Quận 1, TP.HCM
+                        </li>
+                        <li class="mb-2 text-white-50">
+                            <i class="fas fa-phone me-2"></i>1900 1234
+                        </li>
+                        <li class="mb-2 text-white-50">
+                            <i class="fas fa-envelope me-2"></i>support@foodorder.com
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <hr class="my-4 bg-white-50">
+
+            <div class="row">
+                <div class="col-md-6 text-center text-md-start">
+                    <p class="mb-0 text-white-50">
+                        &copy; @DateTime.Now.Year - FoodOrder. All rights reserved.
+                    </p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <p class="mb-0 text-white-50">
+                        <i class="fas fa-heart text-danger me-1"></i>
+                        Made with love for food lovers
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Custom JavaScript -->
+    <script>
+        // Khởi tạo tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Hiển thị loading overlay
+        function showLoading() {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+
+        // Ẩn loading overlay
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+
+        // Hiển thị toast notification
+        function showToast(message, type = 'success') {
+            const toastContainer = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast-custom toast-${type}`;
+            toast.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle text-success' :
+                                 type === 'error' ? 'fa-exclamation-circle text-danger' :
+                                 type === 'warning' ? 'fa-exclamation-triangle text-warning' :
+                                 'fa-info-circle text-info'} fa-lg"></i>
+                <span>${message}</span>
+            `;
+
+            toastContainer.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideInRight 0.3s reverse';
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 3000);
+        }
+
+        // Format currency
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            }).format(amount);
+        }
+
+        // Cập nhật số lượng giỏ hàng
+        function updateCartCount() {
+            @if (User.Identity.IsAuthenticated && !User.IsInRole("Admin"))
+            {
+                    <text>
+                    $.get('/Cart/GetCartCount')
+                        .done(function(data) {
+                            const cartCount = $('#cartCount');
+                            if (data > 0) {
+                                cartCount.text(data).fadeIn();
+                            } else {
+                                cartCount.fadeOut();
+                            }
+                        })
+                        .fail(function() {
+                            console.error('Không thể cập nhật số lượng giỏ hàng');
+                        });
+                    </text>
+            }
+        }
+
+        $(document).ready(function() {
+            // Cập nhật số lượng giỏ hàng khi trang load
+            updateCartCount();
+
+            // Xử lý form logout
+            $('#logoutForm').on('submit', function(e) {
+                if (!confirm('Bạn có chắc muốn đăng xuất?')) {
+                    e.preventDefault();
+                }
+            });
+
+            // Tự động ẩn alerts sau 5 giây
+            setTimeout(function() {
+                $('.alert').fadeOut('slow');
+            }, 5000);
+
+            // Hiệu ứng cho dropdown
+            $('.dropdown').on('show.bs.dropdown', function() {
+                $(this).find('.dropdown-menu').first().stop(true, true).slideDown();
+            });
+
+            $('.dropdown').on('hide.bs.dropdown', function() {
+                $(this).find('.dropdown-menu').first().stop(true, true).slideUp();
+            });
+
+            // Xử lý AJAX errors
+            $(document).ajaxError(function(event, jqxhr, settings, thrownError) {
+                if (jqxhr.status === 401) {
+                    window.location.href = '/Account/Login';
+                } else if (jqxhr.status === 403) {
+                    window.location.href = '/Account/AccessDenied';
+                } else {
+                    showToast('Có lỗi xảy ra, vui lòng thử lại!', 'error');
+                }
+            });
+        });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

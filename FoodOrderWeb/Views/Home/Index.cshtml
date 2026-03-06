@@ -1,0 +1,184 @@
+﻿@model IEnumerable<FoodOrderWeb.Models.FoodItem>
+
+@{
+    ViewData["Title"] = "Trang chủ";
+    var categories = ViewBag.Categories as List<FoodOrderWeb.Models.Category>;
+}
+
+<!-- Hero Section - Bắt mắt, thu hút khách -->
+<section class="hero-section bg-primary text-white py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold animate__animated animate__fadeInLeft">
+                    Đồ ăn ngon - Giao tận nơi
+                </h1>
+                <p class="lead animate__animated animate__fadeInLeft animate__delay-1s">
+                    Hàng ngàn món ăn hấp dẫn từ các nhà hàng nổi tiếng.
+                    Đặt ngay để nhận ưu đãi lên đến 50%!
+                </p>
+                <div class="mt-4 animate__animated animate__fadeInLeft animate__delay-2s">
+                    <a asp-controller="Menu" asp-action="Index" class="btn btn-light btn-lg me-2">
+                        <i class="fas fa-utensils me-2"></i>Xem thực đơn
+                    </a>
+                    <a asp-controller="Account" asp-action="Register" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-user-plus me-2"></i>Đăng ký ngay
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80"
+                     alt="Food Delivery" class="img-fluid rounded-3 shadow-lg animate__animated animate__fadeInRight">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Danh mục nổi bật -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-4">Danh mục nổi bật</h2>
+        <div class="row g-4">
+            @foreach (var category in categories)
+            {
+                <div class="col-md-3 col-sm-6">
+                    <a asp-controller="Menu" asp-action="Index" asp-route-categoryId="@category.Id"
+                       class="text-decoration-none">
+                        <div class="card text-center border-0 shadow-sm hover-card">
+                            <div class="card-body py-4">
+                                <i class="fas fa-utensils fa-3x text-primary mb-3"></i>
+                                <h5 class="card-title">@category.Name</h5>
+                                <p class="card-text text-muted small">@category.Description</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Món ăn nổi bật -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-4">Món ăn nổi bật</h2>
+
+        <div class="row g-4">
+            @foreach (var item in Model)
+            {
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                    <div class="card h-100 border-0 shadow-sm hover-card">
+                        <img src="@(item.ImageUrl ?? "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80")"
+                             class="card-img-top" alt="@item.Name"
+                             style="height: 200px; object-fit: cover;">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title mb-0">@item.Name</h5>
+                                <span class="badge bg-primary">@item.Category?.Name</span>
+                            </div>
+                            <p class="card-text text-muted small">
+                                @(item.Description?.Length > 60 ? item.Description.Substring(0, 60) + "..." : item.Description)
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <span class="h5 text-primary mb-0">@item.Price.ToString("#,0")đ</span>
+                                <a asp-controller="Menu" asp-action="Details" asp-route-id="@item.Id"
+                                   class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-eye me-1"></i>Xem chi tiết
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="text-center mt-4">
+            <a asp-controller="Menu" asp-action="Index" class="btn btn-primary btn-lg">
+                Xem tất cả món ăn <i class="fas fa-arrow-right ms-2"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Lý do chọn chúng tôi -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-4">Tại sao chọn FoodOrder?</h2>
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="text-center">
+                    <div class="feature-icon bg-primary text-white rounded-circle p-3 d-inline-block mb-3">
+                        <i class="fas fa-truck fa-2x"></i>
+                    </div>
+                    <h5>Giao hàng nhanh</h5>
+                    <p class="text-muted">Giao hàng trong 30 phút, đảm bảo nóng hổi</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-center">
+                    <div class="feature-icon bg-primary text-white rounded-circle p-3 d-inline-block mb-3">
+                        <i class="fas fa-shield-alt fa-2x"></i>
+                    </div>
+                    <h5>An toàn vệ sinh</h5>
+                    <p class="text-muted">Đảm bảo an toàn thực phẩm, nguồn gốc rõ ràng</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-center">
+                    <div class="feature-icon bg-primary text-white rounded-circle p-3 d-inline-block mb-3">
+                        <i class="fas fa-wallet fa-2x"></i>
+                    </div>
+                    <h5>Ví điện tử</h5>
+                    <p class="text-muted">Thanh toán nhanh chóng, nhiều ưu đãi hấp dẫn</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-center">
+                    <div class="feature-icon bg-primary text-white rounded-circle p-3 d-inline-block mb-3">
+                        <i class="fas fa-headset fa-2x"></i>
+                    </div>
+                    <h5>Hỗ trợ 24/7</h5>
+                    <p class="text-muted">Đội ngũ CSKH luôn sẵn sàng giúp đỡ bạn</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="py-5 bg-primary text-white">
+    <div class="container text-center">
+        <h2 class="mb-3">Bạn đã sẵn sàng để thưởng thức?</h2>
+        <p class="lead mb-4">Hàng ngàn món ăn ngon đang chờ bạn. Đặt hàng ngay hôm nay!</p>
+        <a asp-controller="Account" asp-action="Register" class="btn btn-light btn-lg me-2">
+            <i class="fas fa-user-plus me-2"></i>Đăng ký ngay
+        </a>
+        <a asp-controller="Menu" asp-action="Index" class="btn btn-outline-light btn-lg">
+            <i class="fas fa-utensils me-2"></i>Xem thực đơn
+        </a>
+    </div>
+</section>
+
+<style>
+    .hover-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+    }
+
+        .hover-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2) !important;
+        }
+
+    .feature-icon {
+        width: 80px;
+        height: 80px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .hero-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+</style>

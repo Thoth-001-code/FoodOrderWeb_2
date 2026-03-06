@@ -1,0 +1,120 @@
+﻿@using FoodOrderWeb.Models;
+@model IEnumerable<FoodOrderWeb.Models.Order>
+
+@{
+    ViewData["Title"] = "Quản lý đơn hàng";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var currentStatus = ViewBag.CurrentStatus as OrderStatus?;
+}
+
+<div class="container-fluid">
+    <h1 class="h3 mb-4">Quản lý đơn hàng</h1>
+
+    <!-- Bộ lọc trạng thái -->
+    <div class="mb-4">
+        <div class="btn-group" role="group">
+            <a asp-action="Index" asp-route-status=""
+               class="btn @(!currentStatus.HasValue ? "btn-primary" : "btn-outline-primary")">
+                Tất cả
+            </a>
+            <a asp-action="Index" asp-route-status="@OrderStatus.Pending"
+               class="btn @(currentStatus == OrderStatus.Pending ? "btn-warning" : "btn-outline-warning")">
+                Chờ xác nhận
+            </a>
+            <a asp-action="Index" asp-route-status="@OrderStatus.Confirmed"
+               class="btn @(currentStatus == OrderStatus.Confirmed ? "btn-info" : "btn-outline-info")">
+                Đã xác nhận
+            </a>
+            <a asp-action="Index" asp-route-status="@OrderStatus.Preparing"
+               class="btn @(currentStatus == OrderStatus.Preparing ? "btn-primary" : "btn-outline-primary")">
+                Đang chuẩn bị
+            </a>
+            <a asp-action="Index" asp-route-status="@OrderStatus.Delivering"
+               class="btn @(currentStatus == OrderStatus.Delivering ? "btn-secondary" : "btn-outline-secondary")">
+                Đang giao
+            </a>
+            <a asp-action="Index" asp-route-status="@OrderStatus.Delivered"
+               class="btn @(currentStatus == OrderStatus.Delivered ? "btn-success" : "btn-outline-success")">
+                Đã giao
+            </a>
+            <a asp-action="Index" asp-route-status="@OrderStatus.Cancelled"
+               class="btn @(currentStatus == OrderStatus.Cancelled ? "btn-danger" : "btn-outline-danger")">
+                Đã hủy
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Mã ĐH</th>
+                            <th>Khách hàng</th>
+                            <th>Ngày đặt</th>
+                            <th>Tổng tiền</th>
+                            <th>Thanh toán</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in Model)
+                        {
+                            <tr>
+                                <td>#@order.Id</td>
+                                <td>@order.User?.FullName</td>
+                                <td>@order.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td class="fw-bold">@order.TotalAmount.ToString("#,0")đ</td>
+                                <td>
+                                    @if (order.PaymentMethod == PaymentMethod.Cash)
+                                    {
+                                        <span>Tiền mặt</span>
+                                    }
+                                    else
+                                    {
+                                        <span>Ví điện tử</span>
+                                    }
+                                    @if (order.IsPaid)
+                                    {
+                                        <span class="badge bg-success ms-1">Đã TT</span>
+                                    }
+                                </td>
+                                <td>
+                                    @switch (order.Status)
+                                    {
+                                        case OrderStatus.Pending:
+                                            <span class="badge bg-warning">Chờ xác nhận</span>
+                                            break;
+                                        case OrderStatus.Confirmed:
+                                            <span class="badge bg-info">Đã xác nhận</span>
+                                            break;
+                                        case OrderStatus.Preparing:
+                                            <span class="badge bg-primary">Đang chuẩn bị</span>
+                                            break;
+                                        case OrderStatus.Delivering:
+                                            <span class="badge bg-secondary">Đang giao</span>
+                                            break;
+                                        case OrderStatus.Delivered:
+                                            <span class="badge bg-success">Đã giao</span>
+                                            break;
+                                        case OrderStatus.Cancelled:
+                                            <span class="badge bg-danger">Đã hủy</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>
+                                    <a asp-action="Details" asp-route-id="@order.Id"
+                                       class="btn btn-sm btn-info">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

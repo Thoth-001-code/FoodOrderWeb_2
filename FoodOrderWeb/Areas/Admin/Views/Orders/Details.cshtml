@@ -1,0 +1,170 @@
+﻿@using FoodOrderWeb.Models;
+@model FoodOrderWeb.Models.Order
+
+@{
+    ViewData["Title"] = $"Chi tiết đơn hàng #{Model.Id}";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3">Chi tiết đơn hàng #@Model.Id</h1>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Quay lại
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Thông tin đơn hàng -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Thông tin đơn hàng</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Ngày đặt:</strong> @Model.OrderDate.ToString("dd/MM/yyyy HH:mm:ss")</p>
+                            <p><strong>Tổng tiền:</strong> <span class="text-primary fw-bold">@Model.TotalAmount.ToString("#,0")đ</span></p>
+                            <p>
+                                <strong>Phương thức thanh toán:</strong>
+                                @if (Model.PaymentMethod == PaymentMethod.Cash)
+                                {
+                                    <span>Tiền mặt</span>
+                                }
+                                else
+                                {
+                                    <span>Ví điện tử</span>
+                                }
+                            </p>
+                            <p>
+                                <strong>Trạng thái thanh toán:</strong>
+                                @if (Model.IsPaid)
+                                {
+                                    <span class="badge bg-success">Đã thanh toán</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning">Chưa thanh toán</span>
+                                }
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Người nhận:</strong> @Model.ReceiverName</p>
+                            <p><strong>Số điện thoại:</strong> @Model.PhoneNumber</p>
+                            <p><strong>Địa chỉ:</strong> @Model.ShippingAddress</p>
+                            @if (!string.IsNullOrEmpty(Model.Notes))
+                            {
+                                <p><strong>Ghi chú:</strong> @Model.Notes</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chi tiết món ăn -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Chi tiết món ăn</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Món ăn</th>
+                                    <th class="text-center">Số lượng</th>
+                                    <th class="text-end">Đơn giá</th>
+                                    <th class="text-end">Thành tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.OrderItems)
+                                {
+                                    <tr>
+                                        <td>@item.FoodItem?.Name</td>
+                                        <td class="text-center">@item.Quantity</td>
+                                        <td class="text-end">@item.Price.ToString("#,0")đ</td>
+                                        <td class="text-end">@((item.Quantity * item.Price).ToString("#,0"))đ</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <!-- Cập nhật trạng thái -->
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Cập nhật trạng thái</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Trạng thái hiện tại</label>
+                        <div class="p-2 bg-light rounded">
+                            @switch (Model.Status)
+                            {
+                                case OrderStatus.Pending:
+                                    <span class="badge bg-warning fs-6">Chờ xác nhận</span>
+                                    break;
+                                case OrderStatus.Confirmed:
+                                    <span class="badge bg-info fs-6">Đã xác nhận</span>
+                                    break;
+                                case OrderStatus.Preparing:
+                                    <span class="badge bg-primary fs-6">Đang chuẩn bị</span>
+                                    break;
+                                case OrderStatus.Delivering:
+                                    <span class="badge bg-secondary fs-6">Đang giao</span>
+                                    break;
+                                case OrderStatus.Delivered:
+                                    <span class="badge bg-success fs-6">Đã giao</span>
+                                    break;
+                                case OrderStatus.Cancelled:
+                                    <span class="badge bg-danger fs-6">Đã hủy</span>
+                                    break;
+                            }
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Cập nhật thành</label>
+                        <select class="form-select" id="statusSelect">
+                            <option value="0" @(Model.Status == OrderStatus.Pending ? "selected" : "")>Chờ xác nhận</option>
+                            <option value="1" @(Model.Status == OrderStatus.Confirmed ? "selected" : "")>Đã xác nhận</option>
+                            <option value="2" @(Model.Status == OrderStatus.Preparing ? "selected" : "")>Đang chuẩn bị</option>
+                            <option value="3" @(Model.Status == OrderStatus.Delivering ? "selected" : "")>Đang giao</option>
+                            <option value="4" @(Model.Status == OrderStatus.Delivered ? "selected" : "")>Đã giao</option>
+                            <option value="5" @(Model.Status == OrderStatus.Cancelled ? "selected" : "")>Đã hủy</option>
+                        </select>
+                    </div>
+
+                    <button onclick="updateStatus(@Model.Id)" class="btn btn-primary w-100">
+                        <i class="fas fa-save me-2"></i>Cập nhật
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function updateStatus(orderId) {
+            var status = $('#statusSelect').val();
+
+            $.post('/Admin/Orders/UpdateStatus', { id: orderId, status: status }, {
+                __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+            }).done(function(response) {
+                if (response.success) {
+                    alert(response.message);
+                    location.reload();
+                } else {
+                    alert(response.message);
+                }
+            });
+        }
+    </script>
+}

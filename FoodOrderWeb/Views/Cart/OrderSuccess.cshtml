@@ -1,0 +1,133 @@
+﻿@model FoodOrderWeb.Models.Order
+
+@{
+    ViewData["Title"] = "Đặt hàng thành công";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow text-center">
+                <div class="card-body py-5">
+                    <div class="mb-4">
+                        <i class="fas fa-check-circle text-success fa-5x"></i>
+                    </div>
+
+                    <h2 class="mb-3">Đặt hàng thành công!</h2>
+
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <p class="lead text-muted mb-4">@TempData["SuccessMessage"]</p>
+                    }
+
+                    <div class="bg-light p-4 rounded mb-4 text-start">
+                        <h5 class="mb-3">Thông tin đơn hàng #@Model.Id</h5>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-2">
+                                    <strong>Ngày đặt:</strong><br>
+                                    @Model.OrderDate.ToString("dd/MM/yyyy HH:mm")
+                                </p>
+                                <p class="mb-2">
+                                    <strong>Tổng tiền:</strong><br>
+                                    <span class="text-primary fw-bold">@Model.TotalAmount.ToString("#,0")đ</span>
+                                </p>
+                                <p class="mb-2">
+                                    <strong>Phương thức thanh toán:</strong><br>
+                                    @if (Model.PaymentMethod == PaymentMethod.Cash)
+                                    {
+                                        <span>Tiền mặt</span>
+                                    }
+                                    else
+                                    {
+                                        <span>Ví điện tử</span>
+                                    }
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-2">
+                                    <strong>Người nhận:</strong><br>
+                                    @Model.ReceiverName
+                                </p>
+                                <p class="mb-2">
+                                    <strong>Số điện thoại:</strong><br>
+                                    @Model.PhoneNumber
+                                </p>
+                                <p class="mb-2">
+                                    <strong>Địa chỉ:</strong><br>
+                                    @Model.ShippingAddress
+                                </p>
+                            </div>
+                        </div>
+
+                        <p class="mb-2">
+                            <strong>Trạng thái:</strong><br>
+                            @switch (Model.Status)
+                            {
+                                case OrderStatus.Pending:
+                                    <span class="badge bg-warning">Chờ xác nhận</span>
+                                    break;
+                                case OrderStatus.Confirmed:
+                                    <span class="badge bg-info">Đã xác nhận</span>
+                                    break;
+                                case OrderStatus.Preparing:
+                                    <span class="badge bg-primary">Đang chuẩn bị</span>
+                                    break;
+                                case OrderStatus.Delivering:
+                                    <span class="badge bg-secondary">Đang giao</span>
+                                    break;
+                                case OrderStatus.Delivered:
+                                    <span class="badge bg-success">Đã giao</span>
+                                    break;
+                                case OrderStatus.Cancelled:
+                                    <span class="badge bg-danger">Đã hủy</span>
+                                    break;
+                            }
+                        </p>
+                    </div>
+
+                    <h5 class="mb-3">Chi tiết đơn hàng</h5>
+                    <div class="table-responsive mb-4">
+                        <table class="table table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Món ăn</th>
+                                    <th class="text-center">Số lượng</th>
+                                    <th class="text-end">Đơn giá</th>
+                                    <th class="text-end">Thành tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.OrderItems)
+                                {
+                                    <tr>
+                                        <td>@item.FoodItem.Name</td>
+                                        <td class="text-center">@item.Quantity</td>
+                                        <td class="text-end">@item.Price.ToString("#,0")đ</td>
+                                        <td class="text-end">@((item.Quantity * item.Price).ToString("#,0"))đ</td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="3" class="text-end">Tổng cộng:</th>
+                                    <th class="text-end text-primary">@Model.TotalAmount.ToString("#,0")đ</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <div class="d-grid gap-2 col-md-6 mx-auto">
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-primary">
+                            <i class="fas fa-home me-2"></i>Về trang chủ
+                        </a>
+                        <a asp-controller="Menu" asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="fas fa-utensils me-2"></i>Tiếp tục mua sắm
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

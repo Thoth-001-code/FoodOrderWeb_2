@@ -1,0 +1,124 @@
+﻿@model List<FoodOrderWeb.Models.Transaction>
+
+@{
+    ViewData["Title"] = "Lịch sử giao dịch";
+    var wallet = ViewBag.Wallet as FoodOrderWeb.Models.Wallet;
+    var currentPage = ViewBag.CurrentPage;
+    var totalPages = ViewBag.TotalPages;
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">
+        <i class="fas fa-history me-2"></i>Lịch sử giao dịch
+    </h2>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Số dư hiện tại</h5>
+                    <h3>@wallet.Balance.ToString("#,0")đ</h3>
+                    <a asp-action="Index" class="text-white">
+                        <i class="fas fa-arrow-left me-1"></i>Quay về ví
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-body">
+            @if (!Model.Any())
+            {
+                <p class="text-muted text-center py-5">Chưa có giao dịch nào</p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Thời gian</th>
+                                <th>Mã GD</th>
+                                <th>Loại</th>
+                                <th>Mô tả</th>
+                                <th class="text-end">Số tiền</th>
+                                <th class="text-end">Số dư trước</th>
+                                <th class="text-end">Số dư sau</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var transaction in Model)
+                            {
+                                <tr>
+                                    <td>@transaction.CreatedAt.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                                    <td>@transaction.Id</td>
+                                    <td>
+                                        @switch (transaction.Type)
+                                        {
+                                            case TransactionType.Deposit:
+                                                <span class="badge bg-success">Nạp tiền</span>
+                                                break;
+                                            case TransactionType.Payment:
+                                                <span class="badge bg-danger">Thanh toán</span>
+                                                break;
+                                            case TransactionType.Refund:
+                                                <span class="badge bg-info">Hoàn tiền</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td>
+                                        @transaction.Description
+                                        @if (transaction.OrderId != null)
+                                        {
+                                            <a asp-controller="Order" asp-action="Details"
+                                               asp-route-id="@transaction.OrderId"
+                                               class="text-primary">(ĐH#@transaction.OrderId)</a>
+                                        }
+                                    </td>
+                                    <td class="text-end fw-bold
+                                                @(transaction.Type == TransactionType.Deposit || transaction.Type == TransactionType.Refund ? "text-success" : "text-danger")">
+                                        @(transaction.Type == TransactionType.Deposit || transaction.Type == TransactionType.Refund ? "+" : "-")
+                                        @transaction.Amount.ToString("#,0")đ
+                                    </td>
+                                    <td class="text-end">@transaction.BalanceBefore.ToString("#,0")đ</td>
+                                    <td class="text-end">@transaction.BalanceAfter.ToString("#,0")đ</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Phân trang -->
+                @if (totalPages > 1)
+                {
+                    <nav aria-label="Page navigation" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                                <a class="page-link" asp-action="Transactions"
+                                   asp-route-page="@(currentPage - 1)">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+
+                            @for (int i = 1; i <= totalPages; i++)
+                            {
+                                <li class="page-item @(i == currentPage ? "active" : "")">
+                                    <a class="page-link" asp-action="Transactions"
+                                       asp-route-page="@i">@i</a>
+                                </li>
+                            }
+
+                            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                                <a class="page-link" asp-action="Transactions"
+                                   asp-route-page="@(currentPage + 1)">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                }
+            }
+        </div>
+    </div>
+</div>

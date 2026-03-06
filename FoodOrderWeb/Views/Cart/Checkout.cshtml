@@ -1,0 +1,140 @@
+﻿@model FoodOrderWeb.ViewModels.CheckoutViewModel
+
+@{
+    ViewData["Title"] = "Thanh toán";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">
+        <i class="fas fa-credit-card me-2"></i>Thanh toán
+    </h2>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Thông tin giao hàng</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="PlaceOrder" method="post" id="orderForm">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="ReceiverName" class="form-label"></label>
+                            <input asp-for="ReceiverName" class="form-control" />
+                            <span asp-validation-for="ReceiverName" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="PhoneNumber" class="form-label"></label>
+                            <input asp-for="PhoneNumber" class="form-control" />
+                            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="ShippingAddress" class="form-label"></label>
+                            <textarea asp-for="ShippingAddress" class="form-control" rows="2"></textarea>
+                            <span asp-validation-for="ShippingAddress" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Notes" class="form-label"></label>
+                            <textarea asp-for="Notes" class="form-control" rows="2"
+                                      placeholder="Ghi chú về đơn hàng (không bắt buộc)..."></textarea>
+                            <span asp-validation-for="Notes" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Phương thức thanh toán</label>
+                            <div class="row">
+                                <div class="col-md-6 mb-2">
+                                    <div class="form-check border rounded p-3">
+                                        <input class="form-check-input" type="radio"
+                                               name="PaymentMethod" id="paymentCash" value="0" checked>
+                                        <label class="form-check-label" for="paymentCash">
+                                            <i class="fas fa-money-bill-wave text-success me-2"></i>
+                                            <strong>Tiền mặt</strong>
+                                            <p class="text-muted small mb-0">Thanh toán khi nhận hàng</p>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <div class="form-check border rounded p-3">
+                                        <input class="form-check-input" type="radio"
+                                               name="PaymentMethod" id="paymentWallet" value="1">
+                                        <label class="form-check-label" for="paymentWallet">
+                                            <i class="fas fa-wallet text-primary me-2"></i>
+                                            <strong>Ví điện tử</strong>
+                                            <p class="text-muted small mb-0">
+                                                Số dư: <span class="text-primary fw-bold">@Model.WalletBalance.ToString("#,0")đ</span>
+                                            </p>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <span asp-validation-for="PaymentMethod" class="text-danger"></span>
+                        </div>
+
+                        <div class="alert alert-warning wallet-warning" style="display: none;">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Số dư trong ví không đủ để thanh toán.
+                            Vui lòng <a asp-controller="Wallet" asp-action="Deposit" class="alert-link">nạp thêm</a>
+                            hoặc chọn phương thức khác.
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Đơn hàng của bạn</h5>
+                </div>
+                <div class="card-body">
+                    @foreach (var item in Model.CartItems)
+                    {
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>@item.FoodItem.Name x @item.Quantity</span>
+                            <span class="fw-bold">@((item.Quantity * item.FoodItem.Price).ToString("#,0"))đ</span>
+                        </div>
+                    }
+                    <hr>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="h6">Tổng cộng:</span>
+                        <span class="h5 text-primary">@Model.Total.ToString("#,0")đ</span>
+                    </div>
+
+                    <button type="submit" form="orderForm" class="btn btn-primary w-100 mt-3">
+                        <i class="fas fa-check-circle me-2"></i>Xác nhận đặt hàng
+                    </button>
+
+                    <a asp-action="Index" class="btn btn-outline-secondary w-100 mt-2">
+                        <i class="fas fa-arrow-left me-2"></i>Quay lại giỏ hàng
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            var walletBalance = @Model.WalletBalance;
+            var total = @Model.Total;
+
+            // Kiểm tra số dư khi chọn thanh toán bằng ví
+            $('input[name="PaymentMethod"]').change(function() {
+                if ($(this).val() == '1' && walletBalance < total) {
+                    $('.wallet-warning').show();
+                } else {
+                    $('.wallet-warning').hide();
+                }
+            });
+        });
+    </script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
